@@ -3,6 +3,7 @@
 
 #include <string>
 #include <sstream>
+#include <vector>
 
 namespace Simple {
 	enum class Palette16 : unsigned {
@@ -365,6 +366,38 @@ namespace Simple {
 
 			return "";
 		}
+		auto Foreground(std::ostringstream& ostr) -> void {
+			switch (this->colorType) {
+			case Type::Palette16:
+				ostr << "\x1b[" << this->Red << "m";
+				break;
+			case Type::Palette256:
+				ostr << "\x1b[38;5;" << this->Red << "m";
+				break;
+			case Type::RGB:
+				ostr << "\x1b[38;2;"
+					<< this->Red << ";"
+					<< this->Green << ";"
+					<< this->Blue << "m";
+				break;
+			}
+		}
+		auto Background(std::ostringstream& ostr) -> void {
+			switch (this->colorType) {
+			case Type::Palette16:
+				ostr << "\x1b[" << this->Red + 10 << "m";
+				break;
+			case Type::Palette256:
+				ostr << "\x1b[48;5;" << this->Red << "m";
+				break;
+			case Type::RGB:
+				ostr << "\x1b[48;2;"
+					<< this->Red << ";"
+					<< this->Green << ";"
+					<< this->Blue << "m";
+				break;
+			}
+		}
 		auto operator ==(const Color& other) -> bool {
 			return
 				this->Red == other.Red &&
@@ -390,6 +423,7 @@ namespace Simple {
 	};
 	class Pixel final {
 	public:
+		Pixel() = default;
 		Pixel(Color foreground, Color background) :
 			Foreground(foreground),
 			Background(background) {
@@ -428,6 +462,148 @@ namespace Simple {
 		Color Foreground = Palette16::Default;
 		Color Background = Palette16::Default;
 		std::string Value = " ";
+	};
+	class Buffer final {
+	public:
+		Buffer(unsigned height, unsigned width) :
+			height(height),
+			width(width),
+			pixels(height* width) {
+		}
+		Buffer(unsigned height, unsigned width, Pixel style) :
+			height(height),
+			width(width),
+			style(style),
+			pixels(height* width, style) {
+		}
+		auto At(unsigned y, unsigned x) -> Pixel& {
+			static Pixel decoy;
+			if (y > this->height || x > this->width) {
+				return decoy;
+			}
+
+			return this->pixels[y * this->width + x];
+		}
+		auto ToString() -> const std::string {
+			std::ostringstream ostr;
+			Pixel prevPixel;
+
+			for (unsigned y = 0; y < this->height; ++y) {
+				if (y > 0) {
+					ostr << "\n";
+				}
+
+				for (unsigned x = 0; x < this->width; ++x) {
+					Pixel& nextPixel = this->pixels[y * this->width + x];
+
+					// Mengatur atribut pixel
+					if (prevPixel.Bold != nextPixel.Bold) {
+						ostr << (nextPixel.Bold ? "\x1b[1m" : "\x1b[22m");
+					}
+					if (prevPixel.Dim != nextPixel.Dim) {
+						ostr << (nextPixel.Dim ? "\x1b[2m" : "\x1b[22m");
+					}
+					if (prevPixel.Italic != nextPixel.Italic) {
+						ostr << (nextPixel.Italic ? "\x1b[3m" : "\x1b[23m");
+					}
+					if (prevPixel.Underline != nextPixel.Underline) {
+						ostr << (nextPixel.Underline ? "\x1b[4m" : "\x1b[24m");
+					}
+					if (prevPixel.Blink != nextPixel.Blink) {
+						ostr << (nextPixel.Blink ? "\x1b[5m" : "\x1b[25m");
+					}
+					if (prevPixel.Invert != nextPixel.Invert) {
+						ostr << (nextPixel.Invert ? "\x1b[7m" : "\x1b[27m");
+					}
+					if (prevPixel.Invisible != nextPixel.Invisible) {
+						ostr << (nextPixel.Invisible ? "\x1b[8m" : "\x1b[28m");
+					}
+					if (prevPixel.Strikethrough != nextPixel.Strikethrough) {
+						ostr << (nextPixel.Strikethrough ? "\x1b[9m" : "\x1b[29m");
+					}
+
+					// Mengatur warna pixel
+					if (prevPixel.Foreground != nextPixel.Foreground) {
+						nextPixel.Foreground.Foreground(ostr);
+					}
+					if (prevPixel.Background != nextPixel.Background) {
+						nextPixel.Background.Background(ostr);
+					}
+
+					ostr << nextPixel.Value;
+				}
+			}
+			ostr << "\x1b[m";
+
+			return ostr.str();
+		}
+		auto Render(std::ostringstream& ostr) {
+			Pixel prevPixel;
+
+			for (unsigned y = 0; y < this->height; ++y) {
+				if (y > 0) {
+					ostr << "\n";
+				}
+
+				for (unsigned x = 0; x < this->width; ++x) {
+					Pixel& nextPixel = this->pixels[y * this->width + x];
+
+					// Mengatur atribut pixel
+					if (prevPixel.Bold != nextPixel.Bold) {
+						ostr << (nextPixel.Bold ? "\x1b[1m" : "\x1b[22m");
+					}
+					if (prevPixel.Dim != nextPixel.Dim) {
+						ostr << (nextPixel.Dim ? "\x1b[2m" : "\x1b[22m");
+					}
+					if (prevPixel.Italic != nextPixel.Italic) {
+						ostr << (nextPixel.Italic ? "\x1b[3m" : "\x1b[23m");
+					}
+					if (prevPixel.Underline != nextPixel.Underline) {
+						ostr << (nextPixel.Underline ? "\x1b[4m" : "\x1b[24m");
+					}
+					if (prevPixel.Blink != nextPixel.Blink) {
+						ostr << (nextPixel.Blink ? "\x1b[5m" : "\x1b[25m");
+					}
+					if (prevPixel.Invert != nextPixel.Invert) {
+						ostr << (nextPixel.Invert ? "\x1b[7m" : "\x1b[27m");
+					}
+					if (prevPixel.Invisible != nextPixel.Invisible) {
+						ostr << (nextPixel.Invisible ? "\x1b[8m" : "\x1b[28m");
+					}
+					if (prevPixel.Strikethrough != nextPixel.Strikethrough) {
+						ostr << (nextPixel.Strikethrough ? "\x1b[9m" : "\x1b[29m");
+					}
+
+					// Mengatur warna pixel
+					if (prevPixel.Foreground != nextPixel.Foreground) {
+						nextPixel.Foreground.Foreground(ostr);
+					}
+					if (prevPixel.Background != nextPixel.Background) {
+						nextPixel.Background.Background(ostr);
+					}
+
+					ostr << nextPixel.Value;
+				}
+			}
+		}
+		auto Height() -> const unsigned& {
+			return this->height;
+		}
+		auto Width() -> const unsigned& {
+			return this->width;
+		}
+		auto Style() -> const Pixel& {
+			return this->style;
+		}
+		auto Clear() -> void {
+			std::fill(this->pixels.begin(), this->pixels.end(), this->style);
+		}
+
+	private:
+		unsigned height = 0;
+		unsigned width = 0;
+		Pixel style;
+		std::vector<Pixel> pixels;
 	};
 }
 
