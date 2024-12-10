@@ -1,6 +1,8 @@
 #ifndef _SIMPLE_
 #define _SIMPLE_
 
+#include <string>
+
 namespace Simple {
 	enum class Palette16 : unsigned {
 		Black = 30,
@@ -280,6 +282,60 @@ namespace Simple {
 		Gainsboro = 253,
 		Gainsboro2 = 254,
 		WhiteSmoke = 255
+	};
+
+	class Color final {
+	public:
+		Color(Palette16 value) :
+			colorType(Type::Palette16),
+			Red(static_cast<unsigned>(value)),
+			Green(static_cast<unsigned>(value)),
+			Blue(static_cast<unsigned>(value)) {
+		}
+		Color(Palette256 value) :
+			colorType(Type::Palette256),
+			Red(static_cast<unsigned>(value)),
+			Green(static_cast<unsigned>(value)),
+			Blue(static_cast<unsigned>(value)) {
+		}
+		Color(unsigned red, unsigned green, unsigned blue) :
+			colorType(Type::RGB),
+			Red(red < 256 ? red : 0),
+			Green(green < 256 ? green : 0),
+			Blue(blue < 256 ? blue : 0) {
+		}
+		Color(const std::string& hex) :
+			colorType(Type::RGB) {
+			if (hex.size() != 7 && hex[0] != '#') {
+				return;
+			}
+
+			this->Red = std::stoi(hex.substr(1, 2), nullptr, 16);
+			this->Green = std::stoi(hex.substr(3, 2), nullptr, 16);
+			this->Blue = std::stoi(hex.substr(5, 2), nullptr, 16);
+		}
+		auto operator ==(const Color& other) -> bool {
+			return
+				this->Red == other.Red &&
+				this->Green == other.Green &&
+				this->Blue == other.Blue;
+		}
+		auto operator !=(const Color& other) -> bool {
+			return !(*this == other);
+		}
+
+	public:
+		unsigned Red = 0;
+		unsigned Green = 0;
+		unsigned Blue = 0;
+
+	private:
+		enum class Type : unsigned {
+			Palette16,
+			Palette256,
+			RGB
+		};
+		Type colorType = Type::Palette16;
 	};
 }
 
