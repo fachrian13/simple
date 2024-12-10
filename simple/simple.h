@@ -2,6 +2,7 @@
 #define _SIMPLE_
 
 #include <string>
+#include <sstream>
 
 namespace Simple {
 	enum class Palette16 : unsigned {
@@ -314,6 +315,56 @@ namespace Simple {
 			this->Green = std::stoi(hex.substr(3, 2), nullptr, 16);
 			this->Blue = std::stoi(hex.substr(5, 2), nullptr, 16);
 		}
+		auto Foreground() -> const std::string {
+			switch (this->colorType) {
+			case Type::Palette16:
+				return std::string(
+					"\x1b[" +
+					std::to_string(this->Red) +
+					"m"
+				);
+			case Type::Palette256:
+				return std::string(
+					"\x1b[38;5;" +
+					std::to_string(this->Red) +
+					"m"
+				);
+			case Type::RGB:
+				return std::string(
+					"\x1b[38;2;" +
+					std::to_string(this->Red) + ";" +
+					std::to_string(this->Green) + ";" +
+					std::to_string(this->Blue) + "m"
+				);
+			}
+
+			return "";
+		}
+		auto Background() -> const std::string {
+			switch (this->colorType) {
+			case Type::Palette16:
+				return std::string(
+					"\x1b[" +
+					std::to_string(this->Red + 10) +
+					"m"
+				);
+			case Type::Palette256:
+				return std::string(
+					"\x1b[48;5;" +
+					std::to_string(this->Red) +
+					"m"
+				);
+			case Type::RGB:
+				return std::string(
+					"\x1b[48;2;" +
+					std::to_string(this->Red) + ";" +
+					std::to_string(this->Green) + ";" +
+					std::to_string(this->Blue) + "m"
+				);
+			}
+
+			return "";
+		}
 		auto operator ==(const Color& other) -> bool {
 			return
 				this->Red == other.Red &&
@@ -336,6 +387,47 @@ namespace Simple {
 			RGB
 		};
 		Type colorType = Type::Palette16;
+	};
+	class Pixel final {
+	public:
+		Pixel(Color foreground, Color background) :
+			Foreground(foreground),
+			Background(background) {
+		}
+		Pixel(Color foreground, Color background, std::string value) :
+			Foreground(foreground),
+			Background(background),
+			Value(std::move(value)) {
+		}
+		auto operator ==(const Pixel& other) -> bool {
+			return
+				this->Bold == other.Bold &&
+				this->Dim == other.Dim &&
+				this->Italic == other.Italic &&
+				this->Underline == other.Underline &&
+				this->Blink == other.Blink &&
+				this->Invert == other.Invert &&
+				this->Invisible == other.Invisible &&
+				this->Strikethrough == other.Strikethrough &&
+				this->Foreground == other.Foreground &&
+				this->Background == other.Background;
+		}
+		auto operator !=(const Pixel& other) -> bool {
+			return !(*this == other);
+		}
+
+	public:
+		bool Bold = false;
+		bool Dim = false;
+		bool Italic = false;
+		bool Underline = false;
+		bool Blink = false;
+		bool Invert = false;
+		bool Invisible = false;
+		bool Strikethrough = false;
+		Color Foreground = Palette16::Default;
+		Color Background = Palette16::Default;
+		std::string Value = " ";
 	};
 }
 
