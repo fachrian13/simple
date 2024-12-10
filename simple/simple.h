@@ -628,6 +628,29 @@ namespace Simple {
 			Rectangle Dimension;
 		};
 	}
+
+	class Text final : public Base::Renderable {
+	public:
+		Text(std::string value) :
+			value(std::move(value)) {
+		}
+
+		auto Init() -> void {
+			Renderable::Height = 1;
+			Renderable::Width = static_cast<unsigned>(this->value.size());
+		}
+		auto Render(Buffer& buf) -> void {
+			// Render teks kedalam buffer
+			for (unsigned y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
+				for (unsigned x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x, ++i) {
+					buf.At(y, x).Value = this->value[i];
+				}
+			}
+		}
+
+	private:
+		std::string value;
+	};
 }
 
 #endif
