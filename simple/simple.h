@@ -605,6 +605,10 @@ namespace Simple {
 		Pixel style;
 		std::vector<Pixel> pixels;
 	};
+
+	namespace Base {
+
+	}
 }
 
 #endif
