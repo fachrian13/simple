@@ -485,7 +485,7 @@ namespace Simple {
 		}
 		auto At(unsigned y, unsigned x) -> Pixel& {
 			static Pixel decoy;
-			if (y > this->height || x > this->width) {
+			if (y >= this->height || x >= this->width) {
 				return decoy;
 			}
 
@@ -628,6 +628,12 @@ namespace Simple {
 			Rectangle Dimension;
 		};
 	}
+	namespace Utility {
+		template<class Type, class... Args>
+		std::vector<Type> ToVector(Args&&... args) {
+			return std::vector<Type>{ std::forward<Args>(args)... };
+		}
+	}
 
 	class Text final : public Base::Renderable {
 	public:
@@ -635,12 +641,12 @@ namespace Simple {
 			value(std::move(value)) {
 		}
 
-		auto Init() -> void {
+		auto Init() -> void override {
 			Renderable::Height = 1;
 			Renderable::Width = static_cast<unsigned>(this->value.size());
 		}
 		auto Render(Buffer& buf) -> void {
-			// Render teks kedalam buffer
+			// Render value kedalam buffer
 			for (unsigned y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
 				for (unsigned x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x, ++i) {
 					buf.At(y, x).Value = this->value[i];
@@ -651,6 +657,102 @@ namespace Simple {
 	private:
 		std::string value;
 	};
+	class VerticalLayout final : public Base::Renderable {
+	public:
+		VerticalLayout(std::vector<std::shared_ptr<Renderable>> elements) :
+			elements(std::move(elements)) {
+		}
+
+		auto Init() -> void override {
+			Renderable::Height = 0;
+			Renderable::Width = 0;
+
+			for (const auto& element : this->elements) {
+				element->Init();
+
+				Renderable::Height += element->Height;
+				Renderable::Width = std::max(Renderable::Width, element->Width);
+			}
+		}
+		auto Set(Rectangle dimension) -> void override {
+			Renderable::Set(dimension);
+
+			for (const auto& element : this->elements) {
+				dimension.Right = dimension.Left + element->Width;
+				dimension.Bottom = dimension.Top + element->Height;
+
+				element->Set(dimension);
+
+				dimension.Top = dimension.Bottom;
+			}
+		}
+		auto Render(Buffer& buf) -> void override {
+			for (const auto& element : this->elements) {
+				element->Render(buf);
+			}
+		}
+
+	private:
+		std::vector<std::shared_ptr<Renderable>> elements;
+	};
+	class HorizontalLayout final : public Base::Renderable {
+	public:
+		HorizontalLayout(std::vector<std::shared_ptr<Renderable>> elements) :
+			elements(std::move(elements)) {
+		}
+
+		auto Init() -> void override {
+			Renderable::Height = 0;
+			Renderable::Width = 0;
+
+			for (const auto& element : this->elements) {
+				element->Init();
+
+				Renderable::Height = std::max(Renderable::Height, element->Height);
+				Renderable::Width += element->Width;
+			}
+		}
+		auto Set(Rectangle dimension) -> void override {
+			Renderable::Set(dimension);
+
+			for (const auto& element : this->elements) {
+				dimension.Right = dimension.Left + element->Width;
+				dimension.Bottom = dimension.Top + element->Height;
+
+				element->Set(dimension);
+
+				dimension.Left = dimension.Right;
+			}
+		}
+		auto Render(Buffer& buf) -> void override {
+			for (const auto& element : this->elements) {
+				element->Render(buf);
+			}
+		}
+
+	private:
+		std::vector<std::shared_ptr<Renderable>> elements;
+	};
+}
+
+std::shared_ptr<Simple::Base::Renderable> Text(std::string value) {
+	return std::make_shared<Simple::Text>(std::move(value));
+}
+template<class... Args>
+std::shared_ptr<Simple::Base::Renderable> VLayout(Args&&... elements) {
+	return std::make_shared<Simple::VerticalLayout>(
+		Simple::Utility::ToVector<std::shared_ptr<Simple::Base::Renderable>>(
+			std::forward<Args>(elements)...
+		)
+	);
+}
+template<class... Args>
+std::shared_ptr<Simple::Base::Renderable> HLayout(Args&&... elements) {
+	return std::make_shared<Simple::HorizontalLayout>(
+		Simple::Utility::ToVector<std::shared_ptr<Simple::Base::Renderable>>(
+			std::forward<Args>(elements)...
+		)
+	);
 }
 
 #endif
