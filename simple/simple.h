@@ -286,6 +286,13 @@ namespace Simple {
 		WhiteSmoke = 255
 	};
 
+	class Rectangle final {
+	public:
+		unsigned Left = 0;
+		unsigned Top = 0;
+		unsigned Right = 0;
+		unsigned Bottom = 0;
+	};
 	class Color final {
 	public:
 		Color(Palette16 value) :
@@ -607,7 +614,19 @@ namespace Simple {
 	};
 
 	namespace Base {
+		class Renderable {
+		public:
+			virtual auto Init() -> void {}
+			virtual auto Set(Rectangle dimension) -> void {
+				this->Dimension = dimension;
+			}
+			virtual auto Render(Buffer&) -> void {}
 
+		public:
+			unsigned Height = 0;
+			unsigned Width = 0;
+			Rectangle Dimension;
+		};
 	}
 }
 
