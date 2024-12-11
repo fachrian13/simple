@@ -15,15 +15,25 @@ int main() {
 
 	auto bLogin = Button("Login");
 	auto bExit = Button("Exit", [&loop]() { loop = false; });
+	auto dAgama = Dropdown("Silakan Pilih",
+		{
+			"Islam",
+			"Kristen",
+			"Hindu",
+			"Buddha"
+		}
+	);
 
 	auto v = VLayout(
 		HLayout(Text("Username: "), Text("[]")),
 		HLayout(Text("Password: "), Text("[]")),
-		HLayout(bLogin, bExit)
+		HLayout(bLogin, bExit),
+		dAgama
 	);
 
 	auto vContainer = VContainer(
-		HContainer(bLogin, bExit)
+		HContainer(bLogin, bExit),
+		dAgama
 	);
 	vContainer->Focused(true);
 

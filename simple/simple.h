@@ -351,6 +351,22 @@ namespace Simple {
 
 			return "";
 		}
+		auto Foreground(std::ostringstream& ostr) -> void {
+			switch (this->colorType) {
+			case Type::Palette16:
+				ostr << "\x1b[" << this->Red << "m";
+				break;
+			case Type::Palette256:
+				ostr << "\x1b[38;5;" << this->Red << "m";
+				break;
+			case Type::RGB:
+				ostr << "\x1b[38;2;"
+					<< this->Red << ";"
+					<< this->Green << ";"
+					<< this->Blue << "m";
+				break;
+			}
+		}
 		auto Background() -> const std::string {
 			switch (this->colorType) {
 			case Type::Palette16:
@@ -375,22 +391,6 @@ namespace Simple {
 			}
 
 			return "";
-		}
-		auto Foreground(std::ostringstream& ostr) -> void {
-			switch (this->colorType) {
-			case Type::Palette16:
-				ostr << "\x1b[" << this->Red << "m";
-				break;
-			case Type::Palette256:
-				ostr << "\x1b[38;5;" << this->Red << "m";
-				break;
-			case Type::RGB:
-				ostr << "\x1b[38;2;"
-					<< this->Red << ";"
-					<< this->Green << ";"
-					<< this->Blue << "m";
-				break;
-			}
 		}
 		auto Background(std::ostringstream& ostr) -> void {
 			switch (this->colorType) {
@@ -912,6 +912,160 @@ namespace Simple {
 		std::string name;
 		std::function<void()> logic;
 	};
+	class Dropdown final : public Base::Renderable, public Base::Focusable {
+	public:
+		Dropdown(std::vector<std::string>&& values) :
+			values(std::move(values)) {
+		}
+		Dropdown(const std::vector<std::string>& values) :
+			values(values) {
+		}
+		Dropdown(std::string placeholder, std::vector<std::string>&& values) :
+			placeholder(std::move(placeholder)),
+			values(std::move(values)) {
+		}
+		Dropdown(std::string placeholder, const std::vector<std::string>& values) :
+			placeholder(std::move(placeholder)),
+			values(values) {
+		}
+
+		auto Init() -> void override {
+			if (Renderable::Width == 0) {
+				Renderable::Width = static_cast<unsigned>(
+					std::max(
+						std::max_element(
+							this->values.begin(),
+							this->values.end(),
+							[](const std::string& a, const std::string& b) {
+								return a.size() < b.size();
+							}
+						)->size(),
+						this->placeholder.size()
+					)
+					) + 1;
+			}
+			Renderable::Height = Focusable::Focused() ? std::min(7, static_cast<int>(this->values.size())) : 1;
+		}
+		auto Render(Buffer& buf) -> void override {
+			// Render area untuk dropdown
+			for (unsigned y = Renderable::Dimension.Top; y < Renderable::Dimension.Bottom; ++y) {
+				for (unsigned x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x) {
+					buf.At(y, x).Invert = true;
+				}
+			}
+
+			// Render teks kedalam console
+			if (!Focusable::Focused()) {
+				// Jika index belum dipilih dan placeholder diisi maka
+				// render placeholder kedalam console
+				if (this->selectedIndex < 0 && !this->placeholder.empty()) {
+					for (unsigned y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
+						for (unsigned x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x, ++i) {
+							if (i < this->placeholder.size()) {
+								buf.At(y, x).Italic = true;
+								buf.At(y, x).Value = this->placeholder[i];
+							}
+							else { break; }
+						}
+					}
+				}
+				// Jika index telah dipilih maka render index kedalam console
+				else {
+					for (unsigned y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
+						for (unsigned x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x) {
+							if (i < this->values[this->selectedIndex].size()) {
+								buf.At(y, x).Value = this->values[this->selectedIndex][i];
+							}
+						}
+					}
+				}
+			}
+			else {
+				// Render list values kedalam console
+				for (unsigned y = Renderable::Dimension.Top, i = this->textBegin; y < Renderable::Dimension.Bottom; ++y, ++i) {
+					for (unsigned x = Renderable::Dimension.Left + 1, ii = 0; x < Renderable::Dimension.Right; ++x, ++ii) {
+						if (ii < this->values[i].size()) {
+							buf.At(y, x).Value = this->values[i][ii];
+						}
+						else { break; }
+
+						// Tandai index yang telah dipilih
+						if (i == this->selectedIndex) {
+							buf.At(y, Renderable::Dimension.Left).Value = "*";
+						}
+					}
+				}
+
+				// Tandai index yang sedang focus
+				for (unsigned y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
+					for (unsigned x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x, ++i) {
+						buf.At(Renderable::Dimension.Top + this->yCursor, x).Invert = false;
+					}
+				}
+			}
+		}
+
+		auto OnKey(const KEY_EVENT_RECORD& keyEvent) -> bool override {
+			if (
+				keyEvent.wVirtualKeyCode == VK_DOWN ||
+				keyEvent.uChar.AsciiChar == 'j' ||
+				keyEvent.uChar.AsciiChar == 'J'
+				) {
+				if (this->index < this->values.size() - 1) {
+					++this->index;
+					this->moveCursor(1);
+					return true;
+				}
+
+				return false;
+			}
+
+			if (
+				keyEvent.wVirtualKeyCode == VK_UP ||
+				keyEvent.uChar.AsciiChar == 'k' ||
+				keyEvent.uChar.AsciiChar == 'K'
+				) {
+				if (this->index > 0) {
+					--this->index;
+					this->moveCursor(-1);
+					return true;
+				}
+
+				return false;
+			}
+
+			if (keyEvent.wVirtualKeyCode == VK_RETURN) {
+				this->selectedIndex = this->index;
+				return true;
+			}
+
+			return false;
+		}
+
+	private:
+		auto moveCursor(int y) -> void {
+			if (y > 0) {
+				if (this->yCursor < Renderable::Height - 1) {
+					++this->yCursor;
+				}
+				else { ++textBegin; }
+			}
+			else if (y < 0) {
+				if (this->yCursor > 0) {
+					--this->yCursor;
+				}
+				else { --textBegin; }
+			}
+		}
+
+	private:
+		unsigned index = 0;
+		int selectedIndex = -1;
+		unsigned yCursor = 0;
+		unsigned textBegin = 0;
+		std::string placeholder;
+		std::vector<std::string> values;
+	};
 }
 
 template<class... Args>
@@ -955,6 +1109,18 @@ std::shared_ptr<Simple::Button> Button(std::string name) {
 }
 std::shared_ptr<Simple::Button> Button(std::string name, std::function<void()> logic) {
 	return std::make_shared<Simple::Button>(std::move(name), std::move(logic));
+}
+std::shared_ptr<Simple::Dropdown> Dropdown(std::vector<std::string>&& values) {
+	return std::make_shared<Simple::Dropdown>(std::move(values));
+}
+std::shared_ptr<Simple::Dropdown> Dropdown(const std::vector<std::string>& values) {
+	return std::make_shared<Simple::Dropdown>(values);
+}
+std::shared_ptr<Simple::Dropdown> Dropdown(std::string placeholder, std::vector<std::string>&& values) {
+	return std::make_shared<Simple::Dropdown>(std::move(placeholder), std::move(values));
+}
+std::shared_ptr<Simple::Dropdown> Dropdown(std::string placeholder, const std::vector<std::string>& values) {
+	return std::make_shared<Simple::Dropdown>(std::move(placeholder), values);
 }
 
 #endif
