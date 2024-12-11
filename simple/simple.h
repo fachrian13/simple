@@ -1,4 +1,4 @@
-#ifndef _SIMPLE_
+﻿#ifndef _SIMPLE_
 #define _SIMPLE_
 #define NOMINMAX
 
@@ -620,6 +620,7 @@ namespace Simple {
 		std::vector<Pixel> pixels;
 	};
 
+	class SelectableGroup;
 	namespace Base {
 		class Renderable {
 		public:
@@ -649,6 +650,32 @@ namespace Simple {
 		private:
 			bool focused = false;
 		};
+		class Selectable {
+		public:
+			Selectable() = default;
+			Selectable(std::string name) :
+				name(std::move(name)) {
+			}
+			auto Selected() -> const bool& {
+				return this->selected;
+			}
+			virtual auto Selected(bool flag) -> void {
+				this->selected = flag;
+			}
+			auto SetGroup(SelectableGroup* group) -> void {
+				this->group = group;
+			}
+			auto Name() -> const std::string& {
+				return this->name;
+			}
+
+		protected:
+			std::string name;
+			SelectableGroup* group = nullptr;
+
+		private:
+			bool selected = false;
+		};
 	}
 	namespace Utility {
 		template<class Type, class... Args>
@@ -656,6 +683,31 @@ namespace Simple {
 			return std::vector<Type>{ std::forward<Args>(args)... };
 		}
 	}
+
+	class SelectableGroup final {
+	public:
+		SelectableGroup(std::vector<std::shared_ptr<Base::Selectable>> components) {
+			for (const auto& component : components) {
+				component->SetGroup(this);
+				this->components.push_back(std::move(component));
+			}
+		}
+		void Clear() {
+			for (const auto& component : this->components) {
+				component->Selected(false);
+			}
+		}
+		auto Selected() -> const std::shared_ptr<Base::Selectable>& {
+			for (const auto& component : this->components) {
+				if (component->Selected()) {
+					return component;
+				}
+			}
+		}
+
+	private:
+		std::vector<std::shared_ptr<Base::Selectable>> components;
+	};
 
 	class VerticalLayout final : public Base::Renderable {
 	public:
@@ -1117,7 +1169,7 @@ namespace Simple {
 				for (int y = Renderable::Dimension.Top, i = this->textBegin; y < Renderable::Dimension.Bottom; ++y) {
 					for (int x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x, ++i) {
 						if (i < this->value.size()) {
-							buf.At(y, x).Value = u8"�";
+							buf.At(y, x).Value = u8"•";
 						}
 						else { break; }
 					}
@@ -1241,6 +1293,68 @@ namespace Simple {
 		std::string value;
 		std::string placeholder;
 	};
+	class CheckBox final : public Base::Renderable, public Base::Focusable, public Base::Selectable {
+	public:
+		CheckBox() = default;
+		CheckBox(std::string name) :
+			Selectable(std::move(name)) {
+		}
+
+		auto Init() -> void override {
+			Renderable::Height = 1;
+			Renderable::Width = 3 + static_cast<int>(Selectable::name.size());
+		}
+		auto Render(Buffer& buf) -> void override {
+			// Render [] kedalam buffer
+			buf.At(Renderable::Dimension.Top, Renderable::Dimension.Left).Value = "[";
+			buf.At(Renderable::Dimension.Top, Renderable::Dimension.Left + 2).Value = "]";
+
+			// Jika nama terisi
+			if (!Selectable::name.empty()) {
+				for (int y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
+					for (int x = Renderable::Dimension.Left + 3; x < Renderable::Dimension.Right; ++x, ++i) {
+						buf.At(y, x).Value = Selectable::name[i];
+					}
+				}
+			}
+
+			// Jika cursor focus pada komponen ini
+			if (Focusable::Focused()) {
+				for (int y = Renderable::Dimension.Top; y < Renderable::Dimension.Bottom; ++y) {
+					for (int x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x) {
+						buf.At(y, x).Invert = true;
+					}
+				}
+			}
+
+			// Jika item ini dipilih
+			if (Selectable::Selected()) {
+				buf.At(Renderable::Dimension.Top, Renderable::Dimension.Left + 1).Value = u8"■";
+			}
+		}
+
+		auto OnKey(const KEY_EVENT_RECORD& keyEvent) -> bool override {
+			if (keyEvent.wVirtualKeyCode == VK_RETURN || keyEvent.uChar.AsciiChar == ' ') {
+				if (Selectable::group) {
+					Selectable::group->Clear();
+				}
+
+				Selectable::Selected(!Selectable::Selected());
+				return true;
+			}
+
+			return false;
+		}
+	};
+}
+
+template<class... Args>
+Simple::SelectableGroup SelectableGroup(Args&&... components) {
+	return Simple::SelectableGroup(
+		Simple::Utility::ToVector<std::shared_ptr<Simple::Base::Selectable>>(
+			std::forward<Args>(components)...
+		)
+	);
 }
 
 template<class... Args>
@@ -1303,4 +1417,11 @@ std::shared_ptr<Simple::Input> Input() {
 std::shared_ptr<Simple::Input> Input(std::string placeholder) {
 	return std::make_shared<Simple::Input>(std::move(placeholder));
 }
+std::shared_ptr<Simple::CheckBox> CheckBox() {
+	return std::make_shared<Simple::CheckBox>();
+}
+std::shared_ptr<Simple::CheckBox> CheckBox(std::string name) {
+	return std::make_shared<Simple::CheckBox>(std::move(name));
+}
+
 #endif

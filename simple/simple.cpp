@@ -9,6 +9,8 @@ using Simple::Buffer;
 using Simple::Text;
 
 int main() {
+	SetConsoleOutputCP(CP_UTF8);
+
 	Pixel p = Pixel(Color("#ff79c6"), Color(Palette16::Default));
 	Buffer b = Buffer(20, 100, p);
 	bool loop = true;
@@ -23,12 +25,17 @@ int main() {
 			"Buddha"
 		}
 	);
+	auto cbCheck = CheckBox();
+	auto cbCheck1 = CheckBox("Check Me");
+	auto sgCheck = SelectableGroup(cbCheck, cbCheck1);
 	auto bLogin = Button("Login");
 	auto bExit = Button("Exit", [&loop]() { loop = false; });
 	auto v = VLayout(
 		HLayout(Text("Username: "), iUsername),
 		HLayout(Text("Password: "), iPassword),
 		dAgama,
+		cbCheck,
+		cbCheck1,
 		HLayout(bLogin, bExit)
 	);
 
@@ -36,6 +43,8 @@ int main() {
 		iUsername,
 		iPassword,
 		dAgama,
+		cbCheck,
+		cbCheck1,
 		HContainer(bLogin, bExit)
 	);
 	vContainer->Focused(true);
