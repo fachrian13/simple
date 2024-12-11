@@ -9,7 +9,7 @@
 #include <windows.h>
 
 namespace Simple {
-	enum class Palette16 : unsigned {
+	enum class Palette16 : int {
 		Black = 30,
 		Red = 31,
 		Green = 32,
@@ -29,7 +29,7 @@ namespace Simple {
 		BrightCyan = 96,
 		BrightWhite = 97
 	};
-	enum class Palette256 : unsigned {
+	enum class Palette256 : int {
 		Black = 0,
 		Maroon = 1,
 		Green = 2,
@@ -291,26 +291,26 @@ namespace Simple {
 
 	class Rectangle final {
 	public:
-		unsigned Left = 0;
-		unsigned Top = 0;
-		unsigned Right = 0;
-		unsigned Bottom = 0;
+		int Left = 0;
+		int Top = 0;
+		int Right = 0;
+		int Bottom = 0;
 	};
 	class Color final {
 	public:
 		Color(Palette16 value) :
 			colorType(Type::Palette16),
-			Red(static_cast<unsigned>(value)),
-			Green(static_cast<unsigned>(value)),
-			Blue(static_cast<unsigned>(value)) {
+			Red(static_cast<int>(value)),
+			Green(static_cast<int>(value)),
+			Blue(static_cast<int>(value)) {
 		}
 		Color(Palette256 value) :
 			colorType(Type::Palette256),
-			Red(static_cast<unsigned>(value)),
-			Green(static_cast<unsigned>(value)),
-			Blue(static_cast<unsigned>(value)) {
+			Red(static_cast<int>(value)),
+			Green(static_cast<int>(value)),
+			Blue(static_cast<int>(value)) {
 		}
-		Color(unsigned red, unsigned green, unsigned blue) :
+		Color(int red, int green, int blue) :
 			colorType(Type::RGB),
 			Red(red < 256 ? red : 0),
 			Green(green < 256 ? green : 0),
@@ -419,12 +419,12 @@ namespace Simple {
 		}
 
 	public:
-		unsigned Red = 0;
-		unsigned Green = 0;
-		unsigned Blue = 0;
+		int Red = 0;
+		int Green = 0;
+		int Blue = 0;
 
 	private:
-		enum class Type : unsigned {
+		enum class Type : int {
 			Palette16,
 			Palette256,
 			RGB
@@ -475,18 +475,18 @@ namespace Simple {
 	};
 	class Buffer final {
 	public:
-		Buffer(unsigned height, unsigned width) :
+		Buffer(int height, int width) :
 			height(height),
 			width(width),
 			pixels(height* width) {
 		}
-		Buffer(unsigned height, unsigned width, Pixel style) :
+		Buffer(int height, int width, Pixel style) :
 			height(height),
 			width(width),
 			style(style),
 			pixels(height* width, style) {
 		}
-		auto At(unsigned y, unsigned x) -> Pixel& {
+		auto At(int y, int x) -> Pixel& {
 			static Pixel decoy;
 			if (y >= this->height || x >= this->width) {
 				return decoy;
@@ -498,12 +498,12 @@ namespace Simple {
 			std::ostringstream ostr;
 			Pixel prevPixel;
 
-			for (unsigned y = 0; y < this->height; ++y) {
+			for (int y = 0; y < this->height; ++y) {
 				if (y > 0) {
 					ostr << "\n";
 				}
 
-				for (unsigned x = 0; x < this->width; ++x) {
+				for (int x = 0; x < this->width; ++x) {
 					Pixel& nextPixel = this->pixels[y * this->width + x];
 
 					// Mengatur atribut pixel
@@ -552,12 +552,12 @@ namespace Simple {
 		auto Render(std::ostringstream& ostr) {
 			Pixel prevPixel;
 
-			for (unsigned y = 0; y < this->height; ++y) {
+			for (int y = 0; y < this->height; ++y) {
 				if (y > 0) {
 					ostr << "\n";
 				}
 
-				for (unsigned x = 0; x < this->width; ++x) {
+				for (int x = 0; x < this->width; ++x) {
 					Pixel& nextPixel = this->pixels[y * this->width + x];
 
 					// Mengatur atribut pixel
@@ -600,10 +600,10 @@ namespace Simple {
 				}
 			}
 		}
-		auto Height() -> const unsigned& {
+		auto Height() -> const int& {
 			return this->height;
 		}
-		auto Width() -> const unsigned& {
+		auto Width() -> const int& {
 			return this->width;
 		}
 		auto Style() -> const Pixel& {
@@ -614,8 +614,8 @@ namespace Simple {
 		}
 
 	private:
-		unsigned height = 0;
-		unsigned width = 0;
+		int height = 0;
+		int width = 0;
 		Pixel style;
 		std::vector<Pixel> pixels;
 	};
@@ -630,8 +630,8 @@ namespace Simple {
 			virtual auto Render(Buffer&) -> void {}
 
 		public:
-			unsigned Height = 0;
-			unsigned Width = 0;
+			int Height = 0;
+			int Width = 0;
 			Rectangle Dimension;
 		};
 		class Focusable {
@@ -741,12 +741,12 @@ namespace Simple {
 
 		auto Init() -> void override {
 			Renderable::Height = 1;
-			Renderable::Width = static_cast<unsigned>(this->value.size());
+			Renderable::Width = static_cast<int>(this->value.size());
 		}
 		auto Render(Buffer& buf) -> void {
 			// Render value kedalam buffer
-			for (unsigned y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
-				for (unsigned x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x, ++i) {
+			for (int y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
+				for (int x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x, ++i) {
 					buf.At(y, x).Value = this->value[i];
 				}
 			}
@@ -805,7 +805,7 @@ namespace Simple {
 		}
 
 	private:
-		unsigned focusedComponent = 0;
+		int focusedComponent = 0;
 		std::vector<std::shared_ptr<Focusable>> components;
 	};
 	class HorizontalContainer final : public Base::Focusable {
@@ -857,7 +857,7 @@ namespace Simple {
 		}
 
 	private:
-		unsigned focusedComponent = 0;
+		int focusedComponent = 0;
 		std::vector<std::shared_ptr<Focusable>> components;
 	};
 	class Button final : public Base::Renderable, public Base::Focusable {
@@ -872,7 +872,7 @@ namespace Simple {
 
 		auto Init() -> void override {
 			Renderable::Height = 1;
-			Renderable::Width = static_cast<unsigned>(this->name.size()) + 2;
+			Renderable::Width = static_cast<int>(this->name.size()) + 2;
 		}
 		auto Render(Buffer& buf) -> void override {
 			// Render [] kedalam buffer
@@ -880,16 +880,16 @@ namespace Simple {
 			buf.At(Renderable::Dimension.Top, Renderable::Dimension.Right - 1).Value = "]";
 
 			// Render name kedalam buffer
-			for (unsigned y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
-				for (unsigned x = Renderable::Dimension.Left + 1; x < Renderable::Dimension.Right - 1; ++x, ++i) {
+			for (int y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
+				for (int x = Renderable::Dimension.Left + 1; x < Renderable::Dimension.Right - 1; ++x, ++i) {
 					buf.At(y, x).Value = this->name[i];
 				}
 			}
 
 			// Jika cursor focus maka invert foreground dan background
 			if (Focusable::Focused()) {
-				for (unsigned y = Renderable::Dimension.Top; y < Renderable::Dimension.Bottom; ++y) {
-					for (unsigned x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x) {
+				for (int y = Renderable::Dimension.Top; y < Renderable::Dimension.Bottom; ++y) {
+					for (int x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x) {
 						buf.At(y, x).Invert = true;
 					}
 				}
@@ -931,7 +931,7 @@ namespace Simple {
 
 		auto Init() -> void override {
 			if (Renderable::Width == 0) {
-				Renderable::Width = static_cast<unsigned>(
+				Renderable::Width = static_cast<int>(
 					std::max(
 						std::max_element(
 							this->values.begin(),
@@ -948,42 +948,16 @@ namespace Simple {
 		}
 		auto Render(Buffer& buf) -> void override {
 			// Render area untuk dropdown
-			for (unsigned y = Renderable::Dimension.Top; y < Renderable::Dimension.Bottom; ++y) {
-				for (unsigned x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x) {
+			for (int y = Renderable::Dimension.Top; y < Renderable::Dimension.Bottom; ++y) {
+				for (int x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x) {
 					buf.At(y, x).Invert = true;
 				}
 			}
 
-			// Render teks kedalam console
-			if (!Focusable::Focused()) {
-				// Jika index belum dipilih dan placeholder diisi maka
-				// render placeholder kedalam console
-				if (this->selectedIndex < 0 && !this->placeholder.empty()) {
-					for (unsigned y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
-						for (unsigned x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x, ++i) {
-							if (i < this->placeholder.size()) {
-								buf.At(y, x).Italic = true;
-								buf.At(y, x).Value = this->placeholder[i];
-							}
-							else { break; }
-						}
-					}
-				}
-				// Jika index telah dipilih maka render index kedalam console
-				else {
-					for (unsigned y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
-						for (unsigned x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x) {
-							if (i < this->values[this->selectedIndex].size()) {
-								buf.At(y, x).Value = this->values[this->selectedIndex][i];
-							}
-						}
-					}
-				}
-			}
-			else {
-				// Render list values kedalam console
-				for (unsigned y = Renderable::Dimension.Top, i = this->textBegin; y < Renderable::Dimension.Bottom; ++y, ++i) {
-					for (unsigned x = Renderable::Dimension.Left + 1, ii = 0; x < Renderable::Dimension.Right; ++x, ++ii) {
+			if (Focusable::Focused()) {
+				// Render list values kedalam buffer
+				for (int y = Renderable::Dimension.Top, i = this->textBegin; y < Renderable::Dimension.Bottom; ++y, ++i) {
+					for (int x = Renderable::Dimension.Left + 1, ii = 0; x < Renderable::Dimension.Right; ++x, ++ii) {
 						if (ii < this->values[i].size()) {
 							buf.At(y, x).Value = this->values[i][ii];
 						}
@@ -997,9 +971,35 @@ namespace Simple {
 				}
 
 				// Tandai index yang sedang focus
-				for (unsigned y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
-					for (unsigned x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x, ++i) {
+				for (int y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
+					for (int x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x, ++i) {
 						buf.At(Renderable::Dimension.Top + this->yCursor, x).Invert = false;
+					}
+				}
+
+				return;
+			}
+
+			// Jika index belum dipilih dan placeholder diisi maka
+			// render placeholder kedalam buffer
+			if (this->selectedIndex < 0 && !this->placeholder.empty()) {
+				for (int y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
+					for (int x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x, ++i) {
+						if (i < this->placeholder.size()) {
+							buf.At(y, x).Italic = true;
+							buf.At(y, x).Value = this->placeholder[i];
+						}
+						else { break; }
+					}
+				}
+			}
+			// Jika index telah dipilih maka render index kedalam buffer
+			else {
+				for (int y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
+					for (int x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x, ++i) {
+						if (i < this->values[this->selectedIndex].size()) {
+							buf.At(y, x).Value = this->values[this->selectedIndex][i];
+						}
 					}
 				}
 			}
@@ -1059,12 +1059,187 @@ namespace Simple {
 		}
 
 	private:
-		unsigned index = 0;
+		int index = 0;
 		int selectedIndex = -1;
-		unsigned yCursor = 0;
-		unsigned textBegin = 0;
+		int yCursor = 0;
+		int textBegin = 0;
 		std::string placeholder;
 		std::vector<std::string> values;
+	};
+	class Input final : public Base::Renderable, public Base::Focusable {
+	public:
+		Input() = default;
+		Input(std::string placeholder) :
+			placeholder(std::move(placeholder)) {
+		}
+
+		auto Init() -> void override {
+			if (Renderable::Height == 0) {
+				Renderable::Height = 1;
+			}
+			if (Renderable::Width == 0) {
+				Renderable::Width = 30;
+			}
+		}
+		auto Render(Buffer& buf) -> void override {
+			// Render area untuk input
+			for (int y = Renderable::Dimension.Top; y < Renderable::Dimension.Bottom; ++y) {
+				for (int x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x) {
+					buf.At(y, x).Invert = true;
+				}
+			}
+
+			// Render posisi cursor jika focus
+			if (Focusable::Focused()) {
+				buf.At(
+					Renderable::Dimension.Top + this->yCursor,
+					Renderable::Dimension.Left + this->xCursor
+				).Invert = false;
+			}
+
+			// Render placeholder jika terisi
+			if (this->value.empty() && !this->placeholder.empty()) {
+				for (int y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
+					for (int x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x, ++i) {
+						if (i < this->placeholder.size()) {
+							buf.At(y, x).Italic = true;
+							buf.At(y, x).Value = this->placeholder[i];
+						}
+						else { break; }
+					}
+				}
+
+				return;
+			}
+
+			// Render jika karakter disembunyikan, atau biasa dikenal dengan password
+			if (this->Hide) {
+				for (int y = Renderable::Dimension.Top, i = this->textBegin; y < Renderable::Dimension.Bottom; ++y) {
+					for (int x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x, ++i) {
+						if (i < this->value.size()) {
+							buf.At(y, x).Value = u8"•";
+						}
+						else { break; }
+					}
+				}
+
+				return;
+			}
+
+			// Render karakter biasa
+			for (int y = Renderable::Dimension.Top, i = this->textBegin; y < Renderable::Dimension.Bottom; ++y) {
+				for (int x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x, ++i) {
+					if (i < this->value.size()) {
+						buf.At(y, x).Value = this->value[i];
+					}
+					else { break; }
+				}
+			}
+		}
+
+		auto OnKey(const KEY_EVENT_RECORD& keyEvent) -> bool override {
+			switch (keyEvent.wVirtualKeyCode) {
+			case VK_LEFT:
+				if (this->index > 0) {
+					--this->index;
+					this->moveCursor(0, -1);
+					return true;
+				}
+				break;
+			case VK_UP:
+				if (this->index - Renderable::Width >= 0) {
+					this->index -= Renderable::Width;
+					this->moveCursor(-1, 0);
+					return true;
+				}
+				break;
+			case VK_RIGHT:
+				if (this->index < this->value.size()) {
+					++this->index;
+					this->moveCursor(0, 1);
+					return true;
+				}
+				break;
+			case VK_DOWN:
+				if (this->index + Renderable::Width <= this->value.size()) {
+					this->index += Renderable::Width;
+					this->moveCursor(1, 0);
+					return true;
+				}
+				break;
+			case VK_BACK:
+				if (this->index > 0) {
+					this->value.erase(this->value.begin() + --this->index);
+					this->moveCursor(0, -1);
+					return true;
+				}
+				break;
+			default:
+				if (this->Pattern(keyEvent.uChar.AsciiChar) && this->index < this->Limit) {
+					this->value.insert(this->value.begin() + index++, keyEvent.uChar.AsciiChar);
+					this->moveCursor(0, 1);
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+	public:
+		bool Hide = false;
+		int Limit = std::numeric_limits<int>::max();
+		std::function<bool(int)> Pattern = [](int ch) { return ch > 0x1F && ch < 0x7F; };
+
+	private:
+		auto moveCursor(int y, int x) -> void {
+			if (y > 0) {
+				if (this->yCursor < Renderable::Height - 1) {
+					++this->yCursor;
+				}
+				else { this->textBegin += Renderable::Width; }
+			}
+			else if (y < 0) {
+				if (this->yCursor > 0) {
+					--this->yCursor;
+				}
+				else { this->textBegin -= Renderable::Width; }
+			}
+
+			if (x > 0) {
+				if (this->xCursor < Renderable::Width - 1) {
+					++this->xCursor;
+				}
+				else if (this->yCursor < Renderable::Height - 1) {
+					this->xCursor = 0;
+					++this->yCursor;
+				}
+				else {
+					this->xCursor = 0;
+					this->textBegin += Renderable::Width;
+				}
+			}
+			else if (x < 0) {
+				if (this->xCursor > 0) {
+					--this->xCursor;
+				}
+				else if (this->yCursor > 0) {
+					this->xCursor = Renderable::Width - 1;
+					--this->yCursor;
+				}
+				else {
+					this->xCursor = Renderable::Width - 1;
+					this->textBegin -= Renderable::Width;
+				}
+			}
+		}
+
+	private:
+		int index = 0;
+		int yCursor = 0;
+		int xCursor = 0;
+		int textBegin = 0;
+		std::string value;
+		std::string placeholder;
 	};
 }
 
@@ -1122,5 +1297,10 @@ std::shared_ptr<Simple::Dropdown> Dropdown(std::string placeholder, std::vector<
 std::shared_ptr<Simple::Dropdown> Dropdown(std::string placeholder, const std::vector<std::string>& values) {
 	return std::make_shared<Simple::Dropdown>(std::move(placeholder), values);
 }
-
+std::shared_ptr<Simple::Input> Input() {
+	return std::make_shared<Simple::Input>();
+}
+std::shared_ptr<Simple::Input> Input(std::string placeholder) {
+	return std::make_shared<Simple::Input>(std::move(placeholder));
+}
 #endif

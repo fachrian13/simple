@@ -9,12 +9,12 @@ using Simple::Buffer;
 using Simple::Text;
 
 int main() {
-	Pixel p = Pixel(Color("#ff79c6"), Color("#282a36"), ".");
+	Pixel p = Pixel(Color("#ff79c6"), Color(Palette16::Default));
 	Buffer b = Buffer(20, 100, p);
 	bool loop = true;
 
-	auto bLogin = Button("Login");
-	auto bExit = Button("Exit", [&loop]() { loop = false; });
+	auto iUsername = Input("John Doe");
+	auto iPassword = Input();
 	auto dAgama = Dropdown("Silakan Pilih",
 		{
 			"Islam",
@@ -23,17 +23,20 @@ int main() {
 			"Buddha"
 		}
 	);
-
+	auto bLogin = Button("Login");
+	auto bExit = Button("Exit", [&loop]() { loop = false; });
 	auto v = VLayout(
-		HLayout(Text("Username: "), Text("[]")),
-		HLayout(Text("Password: "), Text("[]")),
-		HLayout(bLogin, bExit),
-		dAgama
+		HLayout(Text("Username: "), iUsername),
+		HLayout(Text("Password: "), iPassword),
+		dAgama,
+		HLayout(bLogin, bExit)
 	);
 
 	auto vContainer = VContainer(
-		HContainer(bLogin, bExit),
-		dAgama
+		iUsername,
+		iPassword,
+		dAgama,
+		HContainer(bLogin, bExit)
 	);
 	vContainer->Focused(true);
 
