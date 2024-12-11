@@ -11,35 +11,42 @@ using Simple::Text;
 int main() {
 	Pixel p = Pixel(Color("#ff79c6"), Color("#282a36"), ".");
 	Buffer b = Buffer(20, 100, p);
+	bool loop = true;
+
+	auto bLogin = Button("Login");
+	auto bExit = Button("Exit", [&loop]() { loop = false; });
 
 	auto v = VLayout(
-		Text("VERTICAL 1"),
-		Text("VERTICAL 22"),
-		HLayout(
-			Text("HORIZONTAL 1"),
-			Text("HORIZONTAL 22"),
-			VLayout(
-				Text("VERTICAL 1"),
-				Text("VERTICAL 22"),
-				HLayout(
-					Text("HORIZONTAL 1"),
-					Text("HORIZONTAL 22"),
-					Text("HORIZONTAL 333"),
-					Text("HORIZONTAL 4444")
-				),
-				Text("VERTICAL 333"),
-				Text("VERTICAL 4444")
-			),
-			Text("HORIZONTAL 333"),
-			Text("HORIZONTAL 4444")
-		),
-		Text("VERTICAL 333"),
-		Text("VERTICAL 4444")
+		HLayout(Text("Username: "), Text("[]")),
+		HLayout(Text("Password: "), Text("[]")),
+		HLayout(bLogin, bExit)
 	);
 
-	v->Init();
-	v->Set({ 0, 0, v->Width, v->Height });
-	v->Render(b);
-	
-	std::cout << b.ToString();
+	auto vContainer = VContainer(
+		HContainer(bLogin, bExit)
+	);
+	vContainer->Focused(true);
+
+	HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);
+	INPUT_RECORD iRecord[128];
+	DWORD iSize;
+	bool needUpdate = true;
+	while (loop) {
+		ReadConsoleInput(hIn, iRecord, 128, &iSize);
+		for (DWORD i = 0; i < iSize; ++i) {
+			if (iRecord[i].EventType == KEY_EVENT && iRecord[i].Event.KeyEvent.bKeyDown) {
+				vContainer->OnKey(iRecord[i].Event.KeyEvent);
+				needUpdate = true;
+			}
+		}
+
+		if (needUpdate) {
+			b.Clear();
+			v->Init();
+			v->Set({ 0, 0, v->Width, v->Height });
+			v->Render(b);
+			std::cout << "\x1b[H" << b.ToString() << std::flush;
+			needUpdate = false;
+		}
+	}
 }

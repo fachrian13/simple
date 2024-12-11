@@ -1,9 +1,12 @@
 #ifndef _SIMPLE_
 #define _SIMPLE_
+#define NOMINMAX
 
+#include <functional>
 #include <string>
 #include <sstream>
 #include <vector>
+#include <windows.h>
 
 namespace Simple {
 	enum class Palette16 : unsigned {
@@ -538,6 +541,8 @@ namespace Simple {
 					}
 
 					ostr << nextPixel.Value;
+
+					prevPixel = nextPixel;
 				}
 			}
 			ostr << "\x1b[m";
@@ -590,6 +595,8 @@ namespace Simple {
 					}
 
 					ostr << nextPixel.Value;
+
+					prevPixel = nextPixel;
 				}
 			}
 		}
@@ -627,6 +634,21 @@ namespace Simple {
 			unsigned Width = 0;
 			Rectangle Dimension;
 		};
+		class Focusable {
+		public:
+			auto Focused() -> const bool& {
+				return this->focused;
+			}
+			virtual auto Focused(bool flag) -> void {
+				this->focused = flag;
+			}
+			virtual auto OnKey(const KEY_EVENT_RECORD&) -> bool {
+				return false;
+			}
+
+		private:
+			bool focused = false;
+		};
 	}
 	namespace Utility {
 		template<class Type, class... Args>
@@ -635,28 +657,6 @@ namespace Simple {
 		}
 	}
 
-	class Text final : public Base::Renderable {
-	public:
-		Text(std::string value) :
-			value(std::move(value)) {
-		}
-
-		auto Init() -> void override {
-			Renderable::Height = 1;
-			Renderable::Width = static_cast<unsigned>(this->value.size());
-		}
-		auto Render(Buffer& buf) -> void {
-			// Render value kedalam buffer
-			for (unsigned y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
-				for (unsigned x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x, ++i) {
-					buf.At(y, x).Value = this->value[i];
-				}
-			}
-		}
-
-	private:
-		std::string value;
-	};
 	class VerticalLayout final : public Base::Renderable {
 	public:
 		VerticalLayout(std::vector<std::shared_ptr<Renderable>> elements) :
@@ -733,11 +733,187 @@ namespace Simple {
 	private:
 		std::vector<std::shared_ptr<Renderable>> elements;
 	};
+	class Text final : public Base::Renderable {
+	public:
+		Text(std::string value) :
+			value(std::move(value)) {
+		}
+
+		auto Init() -> void override {
+			Renderable::Height = 1;
+			Renderable::Width = static_cast<unsigned>(this->value.size());
+		}
+		auto Render(Buffer& buf) -> void {
+			// Render value kedalam buffer
+			for (unsigned y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
+				for (unsigned x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x, ++i) {
+					buf.At(y, x).Value = this->value[i];
+				}
+			}
+		}
+
+	private:
+		std::string value;
+	};
+
+	class VerticalContainer final : public Base::Focusable {
+	public:
+		VerticalContainer(std::vector<std::shared_ptr<Focusable>> components) :
+			components(std::move(components)) {
+		}
+
+		auto Focused(bool flag) -> void {
+			Focusable::Focused(flag);
+
+			this->components[this->focusedComponent]->Focused(flag);
+		}
+		auto OnKey(const KEY_EVENT_RECORD& keyEvent) -> bool override {
+			if (this->components[this->focusedComponent]->OnKey(keyEvent)) {
+				return true;
+			}
+
+			if (
+				((keyEvent.dwControlKeyState & SHIFT_PRESSED) && keyEvent.wVirtualKeyCode == VK_TAB) ||
+				keyEvent.wVirtualKeyCode == VK_UP ||
+				keyEvent.uChar.AsciiChar == 'k' ||
+				keyEvent.uChar.AsciiChar == 'K') {
+				if (this->focusedComponent > 0) {
+					this->components[this->focusedComponent]->Focused(false);
+					this->components[--this->focusedComponent]->Focused(true);
+					return true;
+				}
+
+				return false;
+			}
+
+			if (
+				keyEvent.wVirtualKeyCode == VK_TAB ||
+				keyEvent.wVirtualKeyCode == VK_DOWN ||
+				keyEvent.uChar.AsciiChar == 'j' ||
+				keyEvent.uChar.AsciiChar == 'J'
+				) {
+				if (this->focusedComponent < this->components.size() - 1) {
+					this->components[this->focusedComponent]->Focused(false);
+					this->components[++this->focusedComponent]->Focused(true);
+					return true;
+				}
+
+				return false;
+			}
+
+			return false;
+		}
+
+	private:
+		unsigned focusedComponent = 0;
+		std::vector<std::shared_ptr<Focusable>> components;
+	};
+	class HorizontalContainer final : public Base::Focusable {
+	public:
+		HorizontalContainer(std::vector<std::shared_ptr<Focusable>> components) :
+			components(std::move(components)) {
+		}
+
+		auto Focused(bool flag) -> void {
+			Focusable::Focused(flag);
+
+			this->components[this->focusedComponent]->Focused(flag);
+		}
+		auto OnKey(const KEY_EVENT_RECORD& keyEvent) -> bool override {
+			if (this->components[this->focusedComponent]->OnKey(keyEvent)) {
+				return true;
+			}
+
+			if (
+				((keyEvent.dwControlKeyState & SHIFT_PRESSED) && keyEvent.wVirtualKeyCode == VK_TAB) ||
+				keyEvent.wVirtualKeyCode == VK_LEFT ||
+				keyEvent.uChar.AsciiChar == 'h' ||
+				keyEvent.uChar.AsciiChar == 'H') {
+				if (this->focusedComponent > 0) {
+					this->components[this->focusedComponent]->Focused(false);
+					this->components[--this->focusedComponent]->Focused(true);
+					return true;
+				}
+
+				return false;
+			}
+
+			if (
+				keyEvent.wVirtualKeyCode == VK_TAB ||
+				keyEvent.wVirtualKeyCode == VK_RIGHT ||
+				keyEvent.uChar.AsciiChar == 'l' ||
+				keyEvent.uChar.AsciiChar == 'L'
+				) {
+				if (this->focusedComponent < this->components.size() - 1) {
+					this->components[this->focusedComponent]->Focused(false);
+					this->components[++this->focusedComponent]->Focused(true);
+					return true;
+				}
+
+				return false;
+			}
+
+			return false;
+		}
+
+	private:
+		unsigned focusedComponent = 0;
+		std::vector<std::shared_ptr<Focusable>> components;
+	};
+	class Button final : public Base::Renderable, public Base::Focusable {
+	public:
+		Button(std::string name) :
+			name(std::move(name)) {
+		}
+		Button(std::string name, std::function<void()> logic) :
+			name(std::move(name)),
+			logic(std::move(logic)) {
+		}
+
+		auto Init() -> void override {
+			Renderable::Height = 1;
+			Renderable::Width = static_cast<unsigned>(this->name.size()) + 2;
+		}
+		auto Render(Buffer& buf) -> void override {
+			// Render [] kedalam buffer
+			buf.At(Renderable::Dimension.Top, Renderable::Dimension.Left).Value = "[";
+			buf.At(Renderable::Dimension.Top, Renderable::Dimension.Right - 1).Value = "]";
+
+			// Render name kedalam buffer
+			for (unsigned y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
+				for (unsigned x = Renderable::Dimension.Left + 1; x < Renderable::Dimension.Right - 1; ++x, ++i) {
+					buf.At(y, x).Value = this->name[i];
+				}
+			}
+
+			// Jika cursor focus maka invert foreground dan background
+			if (Focusable::Focused()) {
+				for (unsigned y = Renderable::Dimension.Top; y < Renderable::Dimension.Bottom; ++y) {
+					for (unsigned x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x) {
+						buf.At(y, x).Invert = true;
+					}
+				}
+			}
+		}
+
+		auto OnKey(const KEY_EVENT_RECORD& keyEvent) -> bool override {
+			switch (keyEvent.wVirtualKeyCode) {
+			case VK_RETURN:
+				if (this->logic) {
+					logic();
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+	private:
+		std::string name;
+		std::function<void()> logic;
+	};
 }
 
-std::shared_ptr<Simple::Base::Renderable> Text(std::string value) {
-	return std::make_shared<Simple::Text>(std::move(value));
-}
 template<class... Args>
 std::shared_ptr<Simple::Base::Renderable> VLayout(Args&&... elements) {
 	return std::make_shared<Simple::VerticalLayout>(
@@ -753,6 +929,32 @@ std::shared_ptr<Simple::Base::Renderable> HLayout(Args&&... elements) {
 			std::forward<Args>(elements)...
 		)
 	);
+}
+std::shared_ptr<Simple::Base::Renderable> Text(std::string value) {
+	return std::make_shared<Simple::Text>(std::move(value));
+}
+
+template<class... Args>
+std::shared_ptr<Simple::Base::Focusable> VContainer(Args&&... elements) {
+	return std::make_shared<Simple::VerticalContainer>(
+		Simple::Utility::ToVector<std::shared_ptr<Simple::Base::Focusable>>(
+			std::forward<Args>(elements)...
+		)
+	);
+}
+template<class... Args>
+std::shared_ptr<Simple::Base::Focusable> HContainer(Args&&... elements) {
+	return std::make_shared<Simple::HorizontalContainer>(
+		Simple::Utility::ToVector<std::shared_ptr<Simple::Base::Focusable>>(
+			std::forward<Args>(elements)...
+		)
+	);
+}
+std::shared_ptr<Simple::Button> Button(std::string name) {
+	return std::make_shared<Simple::Button>(std::move(name));
+}
+std::shared_ptr<Simple::Button> Button(std::string name, std::function<void()> logic) {
+	return std::make_shared<Simple::Button>(std::move(name), std::move(logic));
 }
 
 #endif
