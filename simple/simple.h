@@ -327,29 +327,24 @@ namespace Simple {
 			this->Blue = std::stoi(hex.substr(5, 2), nullptr, 16);
 		}
 		auto Foreground() -> const std::string {
+			std::string result;
+
+			result += "\x1b[";
 			switch (this->colorType) {
 			case Type::Palette16:
-				return std::string(
-					"\x1b[" +
-					std::to_string(this->Red) +
-					"m"
-				);
+				result += std::to_string(this->Red);
 			case Type::Palette256:
-				return std::string(
-					"\x1b[38;5;" +
-					std::to_string(this->Red) +
-					"m"
-				);
+				result += "\x1b[38;5;";
+				result += std::to_string(this->Red);
 			case Type::RGB:
-				return std::string(
-					"\x1b[38;2;" +
-					std::to_string(this->Red) + ";" +
-					std::to_string(this->Green) + ";" +
-					std::to_string(this->Blue) + "m"
-				);
+				result += "\x1b[38;2;";
+				result += std::to_string(this->Red) + ";";
+				result += std::to_string(this->Green) + ";";
+				result += std::to_string(this->Blue);
 			}
+			result += "m";
 
-			return "";
+			return std::move(result);
 		}
 		auto Foreground(std::ostringstream& ostr) -> void {
 			switch (this->colorType) {
@@ -368,29 +363,24 @@ namespace Simple {
 			}
 		}
 		auto Background() -> const std::string {
+			std::string result;
+
+			result += "\x1b[";
 			switch (this->colorType) {
 			case Type::Palette16:
-				return std::string(
-					"\x1b[" +
-					std::to_string(this->Red + 10) +
-					"m"
-				);
+				result += std::to_string(this->Red + 10);
 			case Type::Palette256:
-				return std::string(
-					"\x1b[48;5;" +
-					std::to_string(this->Red) +
-					"m"
-				);
+				result += "\x1b[48;5;";
+				result += std::to_string(this->Red);
 			case Type::RGB:
-				return std::string(
-					"\x1b[48;2;" +
-					std::to_string(this->Red) + ";" +
-					std::to_string(this->Green) + ";" +
-					std::to_string(this->Blue) + "m"
-				);
+				result += "\x1b[48;2;";
+				result += std::to_string(this->Red) + ";";
+				result += std::to_string(this->Green) + ";";
+				result += std::to_string(this->Blue);
 			}
+			result += "m";
 
-			return "";
+			return std::move(result);
 		}
 		auto Background(std::ostringstream& ostr) -> void {
 			switch (this->colorType) {
@@ -495,12 +485,12 @@ namespace Simple {
 			return this->pixels[y * this->width + x];
 		}
 		auto ToString() -> const std::string {
-			std::ostringstream ostr;
+			std::string result;
 			Pixel prevPixel;
 
 			for (int y = 0; y < this->height; ++y) {
 				if (y > 0) {
-					ostr << "\n";
+					result += "\n";
 				}
 
 				for (int x = 0; x < this->width; ++x) {
@@ -508,46 +498,46 @@ namespace Simple {
 
 					// Mengatur atribut pixel
 					if (prevPixel.Bold != nextPixel.Bold) {
-						ostr << (nextPixel.Bold ? "\x1b[1m" : "\x1b[22m");
+						result += nextPixel.Bold ? "\x1b[1m" : "\x1b[22m";
 					}
 					if (prevPixel.Dim != nextPixel.Dim) {
-						ostr << (nextPixel.Dim ? "\x1b[2m" : "\x1b[22m");
+						result += nextPixel.Dim ? "\x1b[2m" : "\x1b[22m";
 					}
 					if (prevPixel.Italic != nextPixel.Italic) {
-						ostr << (nextPixel.Italic ? "\x1b[3m" : "\x1b[23m");
+						result += nextPixel.Italic ? "\x1b[3m" : "\x1b[23m";
 					}
 					if (prevPixel.Underline != nextPixel.Underline) {
-						ostr << (nextPixel.Underline ? "\x1b[4m" : "\x1b[24m");
+						result += nextPixel.Underline ? "\x1b[4m" : "\x1b[24m";
 					}
 					if (prevPixel.Blink != nextPixel.Blink) {
-						ostr << (nextPixel.Blink ? "\x1b[5m" : "\x1b[25m");
+						result += nextPixel.Blink ? "\x1b[5m" : "\x1b[25m";
 					}
 					if (prevPixel.Invert != nextPixel.Invert) {
-						ostr << (nextPixel.Invert ? "\x1b[7m" : "\x1b[27m");
+						result += nextPixel.Invert ? "\x1b[7m" : "\x1b[27m";
 					}
 					if (prevPixel.Invisible != nextPixel.Invisible) {
-						ostr << (nextPixel.Invisible ? "\x1b[8m" : "\x1b[28m");
+						result += nextPixel.Invisible ? "\x1b[8m" : "\x1b[28m";
 					}
 					if (prevPixel.Strikethrough != nextPixel.Strikethrough) {
-						ostr << (nextPixel.Strikethrough ? "\x1b[9m" : "\x1b[29m");
+						result += nextPixel.Strikethrough ? "\x1b[9m" : "\x1b[29m";
 					}
 
 					// Mengatur warna pixel
 					if (prevPixel.Foreground != nextPixel.Foreground) {
-						nextPixel.Foreground.Foreground(ostr);
+						result += nextPixel.Foreground.Foreground();
 					}
 					if (prevPixel.Background != nextPixel.Background) {
-						nextPixel.Background.Background(ostr);
+						result += nextPixel.Background.Background();
 					}
 
-					ostr << nextPixel.Value;
+					result += nextPixel.Value;
 
 					prevPixel = nextPixel;
 				}
 			}
-			ostr << "\x1b[m";
+			result += "\x1b[m";
 
-			return ostr.str();
+			return std::move(result);
 		}
 		auto Render(std::ostringstream& ostr) {
 			Pixel prevPixel;
