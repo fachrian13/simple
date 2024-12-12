@@ -27,6 +27,10 @@ int main() {
 	);
 	auto cbCheck = CheckBox();
 	auto cbCheck1 = CheckBox("Check Me");
+	auto cbRadio = RadioBox();
+	auto cbRadio1 = RadioBox("Check Me");
+	auto tToggle = Toggle();
+	auto tToggle1 = Toggle("Toggle Me");
 	auto sgCheck = SelectableGroup(cbCheck, cbCheck1);
 	auto bLogin = Button("Login");
 	auto bExit = Button("Exit", [&loop]() { loop = false; });
@@ -34,8 +38,9 @@ int main() {
 		HLayout(Text("Username: "), iUsername),
 		HLayout(Text("Password: "), iPassword),
 		dAgama,
-		cbCheck,
-		cbCheck1,
+		HLayout(cbCheck, cbCheck1),
+		HLayout(cbRadio, cbRadio1),
+		HLayout(tToggle1, tToggle),
 		HLayout(bLogin, bExit)
 	);
 
@@ -43,8 +48,9 @@ int main() {
 		iUsername,
 		iPassword,
 		dAgama,
-		cbCheck,
-		cbCheck1,
+		HContainer(cbCheck, cbCheck1),
+		HContainer(cbRadio, cbRadio1),
+		HContainer(tToggle1, tToggle),
 		HContainer(bLogin, bExit)
 	);
 	vContainer->Focused(true);

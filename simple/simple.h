@@ -312,9 +312,9 @@ namespace Simple {
 		}
 		Color(int red, int green, int blue) :
 			colorType(Type::RGB),
-			Red(red < 256 ? red : 0),
-			Green(green < 256 ? green : 0),
-			Blue(blue < 256 ? blue : 0) {
+			Red(red > -1 && red < 256 ? red : 0),
+			Green(green > -1 && green < 256 ? green : 0),
+			Blue(blue > -1 && blue < 256 ? blue : 0) {
 		}
 		Color(const std::string& hex) :
 			colorType(Type::RGB) {
@@ -687,7 +687,7 @@ namespace Simple {
 	class SelectableGroup final {
 	public:
 		SelectableGroup(std::vector<std::shared_ptr<Base::Selectable>> components) {
-			for (const auto& component : components) {
+			for (auto& component : components) {
 				component->SetGroup(this);
 				this->components.push_back(std::move(component));
 			}
@@ -1346,6 +1346,116 @@ namespace Simple {
 			return false;
 		}
 	};
+	class RadioBox final : public Base::Renderable, public Base::Focusable, public Base::Selectable {
+	public:
+		RadioBox() = default;
+		RadioBox(std::string name) :
+			Selectable(std::move(name)) {
+		}
+
+		auto Init() -> void override {
+			Renderable::Height = 1;
+			Renderable::Width = 3 + static_cast<int>(Selectable::name.size());
+		}
+		auto Render(Buffer& buf) -> void override {
+			// Render [] kedalam buffer
+			buf.At(Renderable::Dimension.Top, Renderable::Dimension.Left).Value = "(";
+			buf.At(Renderable::Dimension.Top, Renderable::Dimension.Left + 2).Value = ")";
+
+			// Jika nama terisi
+			if (!Selectable::name.empty()) {
+				for (int y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
+					for (int x = Renderable::Dimension.Left + 3; x < Renderable::Dimension.Right; ++x, ++i) {
+						buf.At(y, x).Value = Selectable::name[i];
+					}
+				}
+			}
+
+			// Jika cursor focus pada komponen ini
+			if (Focusable::Focused()) {
+				for (int y = Renderable::Dimension.Top; y < Renderable::Dimension.Bottom; ++y) {
+					for (int x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x) {
+						buf.At(y, x).Invert = true;
+					}
+				}
+			}
+
+			// Jika item ini dipilih
+			if (Selectable::Selected()) {
+				buf.At(Renderable::Dimension.Top, Renderable::Dimension.Left + 1).Value = u8"●";
+			}
+		}
+
+		auto OnKey(const KEY_EVENT_RECORD& keyEvent) -> bool override {
+			if (keyEvent.wVirtualKeyCode == VK_RETURN || keyEvent.uChar.AsciiChar == ' ') {
+				if (Selectable::group) {
+					Selectable::group->Clear();
+				}
+
+				Selectable::Selected(!Selectable::Selected());
+				return true;
+			}
+
+			return false;
+		}
+	};
+	class Toggle final : public Base::Renderable, public Base::Focusable, public Base::Selectable {
+	public:
+		Toggle() = default;
+		Toggle(std::string name) :
+			Selectable(std::move(name)) {
+		}
+
+		auto Init() -> void override {
+			Renderable::Height = 1;
+			Renderable::Width = (Selectable::Selected() ? 4 : 5) + static_cast<int>(Selectable::name.size());
+		}
+		auto Render(Buffer& buf) -> void override {
+			// Render jika on atau off
+			if (Selectable::Selected()) {
+				buf.At(Renderable::Dimension.Top, Renderable::Dimension.Left).Value = "[";
+				buf.At(Renderable::Dimension.Top, Renderable::Dimension.Left + 1).Value = "O";
+				buf.At(Renderable::Dimension.Top, Renderable::Dimension.Left + 2).Value = "N";
+				buf.At(Renderable::Dimension.Top, Renderable::Dimension.Left + 3).Value = "]";
+			}
+			else {
+				buf.At(Renderable::Dimension.Top, Renderable::Dimension.Left).Value = "[";
+				buf.At(Renderable::Dimension.Top, Renderable::Dimension.Left + 1).Value = "O";
+				buf.At(Renderable::Dimension.Top, Renderable::Dimension.Left + 2).Value = "F";
+				buf.At(Renderable::Dimension.Top, Renderable::Dimension.Left + 3).Value = "F";
+				buf.At(Renderable::Dimension.Top, Renderable::Dimension.Left + 4).Value = "]";
+			}
+
+			// Render nama kedalam buffer
+			for (int y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
+				for (int x = Renderable::Dimension.Left + (Selectable::Selected() ? 4 : 5); x < Renderable::Dimension.Right; ++x, ++i) {
+					buf.At(y, x).Value = Selectable::name[i];
+				}
+			}
+
+			// Jika cursor focus
+			if (Focusable::Focused()) {
+				for (int y = Renderable::Dimension.Top; y < Renderable::Dimension.Bottom; ++y) {
+					for (int x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x) {
+						buf.At(y, x).Invert = true;
+					}
+				}
+			}
+		}
+
+		auto OnKey(const KEY_EVENT_RECORD& keyEvent) -> bool override {
+			if (keyEvent.wVirtualKeyCode == VK_RETURN || keyEvent.uChar.AsciiChar == ' ') {
+				if (Selectable::group) {
+					Selectable::group->Clear();
+				}
+
+				Selectable::Selected(!Selectable::Selected());
+				return true;
+			}
+
+			return false;
+		}
+	};
 }
 
 template<class... Args>
@@ -1422,6 +1532,18 @@ std::shared_ptr<Simple::CheckBox> CheckBox() {
 }
 std::shared_ptr<Simple::CheckBox> CheckBox(std::string name) {
 	return std::make_shared<Simple::CheckBox>(std::move(name));
+}
+std::shared_ptr<Simple::RadioBox> RadioBox() {
+	return std::make_shared<Simple::RadioBox>();
+}
+std::shared_ptr<Simple::RadioBox> RadioBox(std::string name) {
+	return std::make_shared<Simple::RadioBox>(std::move(name));
+}
+std::shared_ptr<Simple::Toggle> Toggle() {
+	return std::make_shared<Simple::Toggle>();
+}
+std::shared_ptr<Simple::Toggle> Toggle(std::string name) {
+	return std::make_shared<Simple::Toggle>(std::move(name));
 }
 
 #endif
