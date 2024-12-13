@@ -42,7 +42,7 @@ int main() {
 		HLayout(cbRadio, cbRadio1),
 		HLayout(tToggle1, tToggle),
 		HLayout(bLogin, bExit)
-	);
+	) | Background(Simple::Color(Simple::Palette256::Lime));
 
 	auto vContainer = VContainer(
 		iUsername,

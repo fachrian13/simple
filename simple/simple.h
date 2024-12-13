@@ -333,34 +333,39 @@ namespace Simple {
 			switch (this->colorType) {
 			case Type::Palette16:
 				result += std::to_string(this->Red);
+				break;
 			case Type::Palette256:
-				result += "\x1b[38;5;";
+				result += "38;5;";
 				result += std::to_string(this->Red);
+				break;
 			case Type::RGB:
-				result += "\x1b[38;2;";
+				result += "38;2;";
 				result += std::to_string(this->Red) + ";";
 				result += std::to_string(this->Green) + ";";
 				result += std::to_string(this->Blue);
+				break;
 			}
 			result += "m";
 
 			return std::move(result);
 		}
 		auto Foreground(std::ostringstream& ostr) -> void {
+			ostr << "\x1b[";
 			switch (this->colorType) {
 			case Type::Palette16:
-				ostr << "\x1b[" << this->Red << "m";
+				ostr << this->Red;
 				break;
 			case Type::Palette256:
-				ostr << "\x1b[38;5;" << this->Red << "m";
+				ostr << "38;5;" << this->Red;
 				break;
 			case Type::RGB:
-				ostr << "\x1b[38;2;"
+				ostr << "38;2;"
 					<< this->Red << ";"
 					<< this->Green << ";"
-					<< this->Blue << "m";
+					<< this->Blue;
 				break;
 			}
+			ostr << "m";
 		}
 		auto Background() -> const std::string {
 			std::string result;
@@ -369,34 +374,39 @@ namespace Simple {
 			switch (this->colorType) {
 			case Type::Palette16:
 				result += std::to_string(this->Red + 10);
+				break;
 			case Type::Palette256:
-				result += "\x1b[48;5;";
+				result += "48;5;";
 				result += std::to_string(this->Red);
+				break;
 			case Type::RGB:
-				result += "\x1b[48;2;";
+				result += "48;2;";
 				result += std::to_string(this->Red) + ";";
 				result += std::to_string(this->Green) + ";";
 				result += std::to_string(this->Blue);
+				break;
 			}
 			result += "m";
 
 			return std::move(result);
 		}
 		auto Background(std::ostringstream& ostr) -> void {
+			ostr << "\x1b[";
 			switch (this->colorType) {
 			case Type::Palette16:
-				ostr << "\x1b[" << this->Red + 10 << "m";
+				ostr << this->Red;
 				break;
 			case Type::Palette256:
-				ostr << "\x1b[48;5;" << this->Red << "m";
+				ostr << "48;5;" << this->Red;
 				break;
 			case Type::RGB:
-				ostr << "\x1b[48;2;"
+				ostr << "48;2;"
 					<< this->Red << ";"
 					<< this->Green << ";"
-					<< this->Blue << "m";
+					<< this->Blue;
 				break;
 			}
+			ostr << "m";
 		}
 		auto operator ==(const Color& other) -> bool {
 			return
@@ -665,6 +675,28 @@ namespace Simple {
 
 		private:
 			bool selected = false;
+		};
+		class Modifier : public Renderable {
+		public:
+			Modifier(std::shared_ptr<Renderable> element) :
+				element(std::move(element)) {
+			}
+
+			virtual auto Init() -> void override {
+				this->element->Init();
+				Renderable::Height = this->element->Height;
+				Renderable::Width = this->element->Width;
+			}
+			virtual auto Set(Rectangle dimension) -> void override {
+				this->element->Set(dimension);
+				Renderable::Set(dimension);
+			}
+			virtual auto Render(Buffer& buf) -> void override {
+				this->element->Render(buf);
+			}
+
+		protected:
+			std::shared_ptr<Renderable> element;
 		};
 	}
 	namespace Utility {
@@ -1446,10 +1478,191 @@ namespace Simple {
 			return false;
 		}
 	};
+
+	class Bold final : public Base::Modifier {
+	public:
+		Bold(std::shared_ptr<Renderable> element) :
+			Modifier(std::move(element)) {
+		}
+
+		auto Render(Buffer& buf) -> void override {
+			Modifier::Render(buf);
+
+			for (int y = Modifier::Dimension.Top; y < Modifier::Dimension.Bottom; ++y) {
+				for (int x = Modifier::Dimension.Left; x < Modifier::Dimension.Right; ++x) {
+					buf.At(y, x).Bold = true;
+				}
+			}
+		}
+	};
+	class Dim final : public Base::Modifier {
+	public:
+		Dim(std::shared_ptr<Renderable> element) :
+			Modifier(std::move(element)) {
+		}
+
+		auto Render(Buffer& buf) -> void override {
+			Modifier::Render(buf);
+
+			for (int y = Modifier::Dimension.Top; y < Modifier::Dimension.Bottom; ++y) {
+				for (int x = Modifier::Dimension.Left; x < Modifier::Dimension.Right; ++x) {
+					buf.At(y, x).Dim = true;
+				}
+			}
+		}
+	};
+	class Italic final : public Base::Modifier {
+	public:
+		Italic(std::shared_ptr<Renderable> element) :
+			Modifier(std::move(element)) {
+		}
+
+		auto Render(Buffer& buf) -> void override {
+			Modifier::Render(buf);
+
+			for (int y = Modifier::Dimension.Top; y < Modifier::Dimension.Bottom; ++y) {
+				for (int x = Modifier::Dimension.Left; x < Modifier::Dimension.Right; ++x) {
+					buf.At(y, x).Italic = true;
+				}
+			}
+		}
+	};
+	class Underline final : public Base::Modifier {
+	public:
+		Underline(std::shared_ptr<Renderable> element) :
+			Modifier(std::move(element)) {
+		}
+
+		auto Render(Buffer& buf) -> void override {
+			Modifier::Render(buf);
+
+			for (int y = Modifier::Dimension.Top; y < Modifier::Dimension.Bottom; ++y) {
+				for (int x = Modifier::Dimension.Left; x < Modifier::Dimension.Right; ++x) {
+					buf.At(y, x).Underline = true;
+				}
+			}
+		}
+	};
+	class Blink final : public Base::Modifier {
+	public:
+		Blink(std::shared_ptr<Renderable> element) :
+			Modifier(std::move(element)) {
+		}
+
+		auto Render(Buffer& buf) -> void override {
+			Modifier::Render(buf);
+
+			for (int y = Modifier::Dimension.Top; y < Modifier::Dimension.Bottom; ++y) {
+				for (int x = Modifier::Dimension.Left; x < Modifier::Dimension.Right; ++x) {
+					buf.At(y, x).Blink = true;
+				}
+			}
+		}
+	};
+	class Invert final : public Base::Modifier {
+	public:
+		Invert(std::shared_ptr<Renderable> element) :
+			Modifier(std::move(element)) {
+		}
+
+		auto Render(Buffer& buf) -> void override {
+			Modifier::Render(buf);
+
+			for (int y = Modifier::Dimension.Top; y < Modifier::Dimension.Bottom; ++y) {
+				for (int x = Modifier::Dimension.Left; x < Modifier::Dimension.Right; ++x) {
+					buf.At(y, x).Invert = true;
+				}
+			}
+		}
+	};
+	class Invisible final : public Base::Modifier {
+	public:
+		Invisible(std::shared_ptr<Renderable> element) :
+			Modifier(std::move(element)) {
+		}
+
+		auto Render(Buffer& buf) -> void override {
+			Modifier::Render(buf);
+
+			for (int y = Modifier::Dimension.Top; y < Modifier::Dimension.Bottom; ++y) {
+				for (int x = Modifier::Dimension.Left; x < Modifier::Dimension.Right; ++x) {
+					buf.At(y, x).Invisible = true;
+				}
+			}
+		}
+	};
+	class Strikethrough final : public Base::Modifier {
+	public:
+		Strikethrough(std::shared_ptr<Renderable> element) :
+			Modifier(std::move(element)) {
+		}
+
+		auto Render(Buffer& buf) -> void override {
+			Modifier::Render(buf);
+
+			for (int y = Modifier::Dimension.Top; y < Modifier::Dimension.Bottom; ++y) {
+				for (int x = Modifier::Dimension.Left; x < Modifier::Dimension.Right; ++x) {
+					buf.At(y, x).Strikethrough = true;
+				}
+			}
+		}
+	};
+	class Foreground final : public Base::Modifier {
+	public:
+		Foreground(std::shared_ptr<Renderable> element, Color color) :
+			Modifier(std::move(element)),
+			color(color) {
+		}
+
+		auto Render(Buffer& buf) -> void override {
+			Modifier::Render(buf);
+
+			for (int y = Modifier::Dimension.Top; y < Modifier::Dimension.Bottom; ++y) {
+				for (int x = Modifier::Dimension.Left; x < Modifier::Dimension.Right; ++x) {
+					if (buf.At(y, x).Foreground == buf.Style().Foreground)
+						buf.At(y, x).Foreground = this->color;
+				}
+			}
+		}
+
+	private:
+		Color color;
+	};
+	class Background final : public Base::Modifier {
+	public:
+		Background(std::shared_ptr<Renderable> element, Color color) :
+			Modifier(std::move(element)),
+			color(color) {
+		}
+
+		auto Init() -> void override {
+			Modifier::Init();
+
+			Renderable::Height = Modifier::element->Height;
+			Renderable::Width = Modifier::element->Width;
+		}
+		auto Set(Rectangle dimension) -> void override {
+			Modifier::Set(dimension);
+			Renderable::Set(dimension);
+		}
+		auto Render(Buffer& buf) -> void override {
+			Modifier::Render(buf);
+
+			for (int y = Modifier::Dimension.Top; y < Modifier::Dimension.Bottom; ++y) {
+				for (int x = Modifier::Dimension.Left; x < Modifier::Dimension.Right; ++x) {
+					if (buf.At(y, x).Background == buf.Style().Background)
+						buf.At(y, x).Background = this->color;
+				}
+			}
+		}
+
+	private:
+		Color color;
+	};
 }
 
 template<class... Args>
-Simple::SelectableGroup SelectableGroup(Args&&... components) {
+auto SelectableGroup(Args&&... components) -> Simple::SelectableGroup {
 	return Simple::SelectableGroup(
 		Simple::Utility::ToVector<std::shared_ptr<Simple::Base::Selectable>>(
 			std::forward<Args>(components)...
@@ -1458,7 +1671,7 @@ Simple::SelectableGroup SelectableGroup(Args&&... components) {
 }
 
 template<class... Args>
-std::shared_ptr<Simple::Base::Renderable> VLayout(Args&&... elements) {
+auto VLayout(Args&&... elements) -> std::shared_ptr<Simple::Base::Renderable> {
 	return std::make_shared<Simple::VerticalLayout>(
 		Simple::Utility::ToVector<std::shared_ptr<Simple::Base::Renderable>>(
 			std::forward<Args>(elements)...
@@ -1466,19 +1679,19 @@ std::shared_ptr<Simple::Base::Renderable> VLayout(Args&&... elements) {
 	);
 }
 template<class... Args>
-std::shared_ptr<Simple::Base::Renderable> HLayout(Args&&... elements) {
+auto HLayout(Args&&... elements) -> std::shared_ptr<Simple::Base::Renderable> {
 	return std::make_shared<Simple::HorizontalLayout>(
 		Simple::Utility::ToVector<std::shared_ptr<Simple::Base::Renderable>>(
 			std::forward<Args>(elements)...
 		)
 	);
 }
-std::shared_ptr<Simple::Base::Renderable> Text(std::string value) {
+auto Text(std::string value) -> std::shared_ptr<Simple::Base::Renderable> {
 	return std::make_shared<Simple::Text>(std::move(value));
 }
 
 template<class... Args>
-std::shared_ptr<Simple::Base::Focusable> VContainer(Args&&... elements) {
+auto VContainer(Args&&... elements) -> std::shared_ptr<Simple::Base::Focusable> {
 	return std::make_shared<Simple::VerticalContainer>(
 		Simple::Utility::ToVector<std::shared_ptr<Simple::Base::Focusable>>(
 			std::forward<Args>(elements)...
@@ -1486,54 +1699,96 @@ std::shared_ptr<Simple::Base::Focusable> VContainer(Args&&... elements) {
 	);
 }
 template<class... Args>
-std::shared_ptr<Simple::Base::Focusable> HContainer(Args&&... elements) {
+auto HContainer(Args&&... elements) -> std::shared_ptr<Simple::Base::Focusable> {
 	return std::make_shared<Simple::HorizontalContainer>(
 		Simple::Utility::ToVector<std::shared_ptr<Simple::Base::Focusable>>(
 			std::forward<Args>(elements)...
 		)
 	);
 }
-std::shared_ptr<Simple::Button> Button(std::string name) {
+auto Button(std::string name) -> std::shared_ptr<Simple::Button> {
 	return std::make_shared<Simple::Button>(std::move(name));
 }
-std::shared_ptr<Simple::Button> Button(std::string name, std::function<void()> logic) {
+auto Button(std::string name, std::function<void()> logic) -> std::shared_ptr<Simple::Button> {
 	return std::make_shared<Simple::Button>(std::move(name), std::move(logic));
 }
-std::shared_ptr<Simple::Dropdown> Dropdown(std::vector<std::string>&& values) {
+auto Dropdown(std::vector<std::string>&& values) -> std::shared_ptr<Simple::Dropdown> {
 	return std::make_shared<Simple::Dropdown>(std::move(values));
 }
-std::shared_ptr<Simple::Dropdown> Dropdown(const std::vector<std::string>& values) {
+auto Dropdown(const std::vector<std::string>& values) -> std::shared_ptr<Simple::Dropdown> {
 	return std::make_shared<Simple::Dropdown>(values);
 }
-std::shared_ptr<Simple::Dropdown> Dropdown(std::string placeholder, std::vector<std::string>&& values) {
+auto Dropdown(std::string placeholder, std::vector<std::string>&& values) -> std::shared_ptr<Simple::Dropdown> {
 	return std::make_shared<Simple::Dropdown>(std::move(placeholder), std::move(values));
 }
-std::shared_ptr<Simple::Dropdown> Dropdown(std::string placeholder, const std::vector<std::string>& values) {
+auto Dropdown(std::string placeholder, const std::vector<std::string>& values) -> std::shared_ptr<Simple::Dropdown> {
 	return std::make_shared<Simple::Dropdown>(std::move(placeholder), values);
 }
-std::shared_ptr<Simple::Input> Input() {
+auto Input() -> std::shared_ptr<Simple::Input> {
 	return std::make_shared<Simple::Input>();
 }
-std::shared_ptr<Simple::Input> Input(std::string placeholder) {
+auto Input(std::string placeholder) -> std::shared_ptr<Simple::Input> {
 	return std::make_shared<Simple::Input>(std::move(placeholder));
 }
-std::shared_ptr<Simple::CheckBox> CheckBox() {
+auto CheckBox() -> std::shared_ptr<Simple::CheckBox> {
 	return std::make_shared<Simple::CheckBox>();
 }
-std::shared_ptr<Simple::CheckBox> CheckBox(std::string name) {
+auto CheckBox(std::string name) -> std::shared_ptr<Simple::CheckBox> {
 	return std::make_shared<Simple::CheckBox>(std::move(name));
 }
-std::shared_ptr<Simple::RadioBox> RadioBox() {
+auto RadioBox() -> std::shared_ptr<Simple::RadioBox> {
 	return std::make_shared<Simple::RadioBox>();
 }
-std::shared_ptr<Simple::RadioBox> RadioBox(std::string name) {
+auto RadioBox(std::string name) -> std::shared_ptr<Simple::RadioBox> {
 	return std::make_shared<Simple::RadioBox>(std::move(name));
 }
-std::shared_ptr<Simple::Toggle> Toggle() {
+auto Toggle() -> std::shared_ptr<Simple::Toggle> {
 	return std::make_shared<Simple::Toggle>();
 }
-std::shared_ptr<Simple::Toggle> Toggle(std::string name) {
+auto Toggle(std::string name) -> std::shared_ptr<Simple::Toggle> {
 	return std::make_shared<Simple::Toggle>(std::move(name));
+}
+
+auto Bold(std::shared_ptr<Simple::Base::Renderable> element) -> std::shared_ptr<Simple::Base::Renderable> {
+	return std::make_shared<Simple::Bold>(std::move(element));
+}
+auto Dim(std::shared_ptr<Simple::Base::Renderable> element) -> std::shared_ptr<Simple::Base::Renderable> {
+	return std::make_shared<Simple::Dim>(std::move(element));
+}
+auto Italic(std::shared_ptr<Simple::Base::Renderable> element) -> std::shared_ptr<Simple::Base::Renderable> {
+	return std::make_shared<Simple::Italic>(std::move(element));
+}
+auto Underline(std::shared_ptr<Simple::Base::Renderable> element) -> std::shared_ptr<Simple::Base::Renderable> {
+	return std::make_shared<Simple::Underline>(std::move(element));
+}
+auto Blink(std::shared_ptr<Simple::Base::Renderable> element) -> std::shared_ptr<Simple::Base::Renderable> {
+	return std::make_shared<Simple::Blink>(std::move(element));
+}
+auto Invert(std::shared_ptr<Simple::Base::Renderable> element) -> std::shared_ptr<Simple::Base::Renderable> {
+	return std::make_shared<Simple::Invert>(std::move(element));
+}
+auto Invisible(std::shared_ptr<Simple::Base::Renderable> element) -> std::shared_ptr<Simple::Base::Renderable> {
+	return std::make_shared<Simple::Invisible>(std::move(element));
+}
+auto Strikethrough(std::shared_ptr<Simple::Base::Renderable> element) -> std::shared_ptr<Simple::Base::Renderable> {
+	return std::make_shared<Simple::Strikethrough>(std::move(element));
+}
+auto Foreground(Simple::Color color) -> std::function<std::shared_ptr<Simple::Base::Renderable>(std::shared_ptr<Simple::Base::Renderable>)> {
+	return [color](std::shared_ptr<Simple::Base::Renderable> element) {
+		return std::make_shared<Simple::Foreground>(std::move(element), color);
+		};
+}
+auto Background(Simple::Color color) -> std::function<std::shared_ptr<Simple::Base::Renderable>(std::shared_ptr<Simple::Base::Renderable>)> {
+	return [color](std::shared_ptr<Simple::Base::Renderable> element) {
+		return std::make_shared<Simple::Background>(std::move(element), color);
+		};
+}
+
+auto operator |(
+	std::shared_ptr<Simple::Base::Renderable> rvalue,
+	std::function<std::shared_ptr<Simple::Base::Renderable>(std::shared_ptr<Simple::Base::Renderable>)> nvalue
+	) -> std::shared_ptr<Simple::Base::Renderable> {
+	return nvalue(std::move(rvalue));
 }
 
 #endif
