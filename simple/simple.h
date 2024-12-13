@@ -700,6 +700,21 @@ namespace Simple {
 		};
 	}
 	namespace Utility {
+		class RowType {
+		public:
+			std::string Left;
+			std::string Middle;
+			std::string Right;
+		};
+		class BorderStyle {
+		public:
+			std::string Horizontal;
+			std::string Vertical;
+			RowType Top;
+			RowType Middle;
+			RowType Bottom;
+		};
+
 		template<class Type, class... Args>
 		std::vector<Type> ToVector(Args&&... args) {
 			return std::vector<Type>{ std::forward<Args>(args)... };
@@ -1414,7 +1429,7 @@ namespace Simple {
 					Selectable::group->Clear();
 				}
 
-				Selectable::Selected(!Selectable::Selected());
+				Selectable::Selected(true);
 				return true;
 			}
 
@@ -1659,6 +1674,52 @@ namespace Simple {
 	private:
 		Color color;
 	};
+	class Border final : public Base::Modifier {
+	public:
+		Border(std::shared_ptr<Simple::Base::Renderable> element) :
+			Modifier(std::move(element)) {
+		}
+		Border(std::shared_ptr<Simple::Base::Renderable> element, Utility::BorderStyle style) :
+			Modifier(std::move(element)),
+			style(style) {
+		}
+
+		auto Init() -> void override {
+			Modifier::Init();
+
+			Renderable::Height = Modifier::element->Height + 2;
+			Renderable::Width = Modifier::element->Width + 2;
+		}
+		auto Set(Rectangle dimension) -> void override {
+			Modifier::Set({ dimension.Left + 1, dimension.Top + 1, dimension.Right - 1, dimension.Bottom - 1 });
+			Renderable::Set(dimension);
+		}
+		void Render(Buffer& buffer) override {
+			Modifier::Render(buffer);
+
+			buffer.At(Renderable::Dimension.Top, Renderable::Dimension.Left).Value = this->style.Top.Left;
+			buffer.At(Renderable::Dimension.Top, Renderable::Dimension.Right - 1).Value = this->style.Top.Right;
+			buffer.At(Renderable::Dimension.Bottom - 1, Renderable::Dimension.Left).Value = this->style.Bottom.Left;
+			buffer.At(Renderable::Dimension.Bottom - 1, Renderable::Dimension.Right - 1).Value = this->style.Bottom.Right;
+
+			for (int x = Renderable::Dimension.Left + 1; x < Renderable::Dimension.Right - 1; ++x) {
+				buffer.At(Renderable::Dimension.Top, x).Value = this->style.Horizontal;
+				buffer.At(Renderable::Dimension.Bottom - 1, x).Value = this->style.Horizontal;
+			}
+			for (int y = Renderable::Dimension.Top + 1; y < Renderable::Dimension.Bottom - 1; ++y) {
+				buffer.At(y, Renderable::Dimension.Left).Value = this->style.Vertical;
+				buffer.At(y, Renderable::Dimension.Right - 1).Value = this->style.Vertical;
+			}
+		}
+
+	private:
+		Utility::BorderStyle style = {
+			"-", "|",
+			{"+", "+", "+"},
+			{"+", "+", "+"},
+			{"+", "+", "+"}
+		};
+	};
 }
 
 template<class... Args>
@@ -1783,6 +1844,14 @@ auto Background(Simple::Color color) -> std::function<std::shared_ptr<Simple::Ba
 		return std::make_shared<Simple::Background>(std::move(element), color);
 		};
 }
+auto Border(std::shared_ptr<Simple::Base::Renderable> element) {
+	return std::make_shared<Simple::Border>(std::move(element));
+}
+auto BorderStyle(Simple::Utility::BorderStyle style) -> std::function<std::shared_ptr<Simple::Base::Renderable>(std::shared_ptr<Simple::Base::Renderable>)> {
+	return  [style](std::shared_ptr<Simple::Base::Renderable> element) {
+		return std::make_shared<Simple::Border>(std::move(element), style);
+		};
+}
 
 auto operator |(
 	std::shared_ptr<Simple::Base::Renderable> rvalue,
@@ -1790,5 +1859,42 @@ auto operator |(
 	) -> std::shared_ptr<Simple::Base::Renderable> {
 	return nvalue(std::move(rvalue));
 }
+
+static const Simple::Utility::BorderStyle Ascii = {
+	"-", "|",
+	{"+", "+", "+"},
+	{"+", "+", "+"},
+	{"+", "+", "+"}
+};
+static const Simple::Utility::BorderStyle Line = {
+	u8"━", u8"┃",
+	{u8"┏", u8"┳", u8"┓"},
+	{u8"┣", u8"╋", u8"┫"},
+	{u8"┗", u8"┻", u8"┛"}
+};
+static const Simple::Utility::BorderStyle DoubleLine = {
+	u8"═", u8"║",
+	{u8"╔", u8"╦", u8"╗"},
+	{u8"╠", u8"╬", u8"╣"},
+	{u8"╚", u8"╩", u8"╝"}
+};
+static const Simple::Utility::BorderStyle None = {
+	" ", " ",
+	{" ", " ", " "},
+	{" ", " ", " "},
+	{" ", " ", " "}
+};
+static const Simple::Utility::BorderStyle Rounded = {
+	u8"─", u8"│",
+	{u8"╭", u8"─", u8"╮"},
+	{u8"│", u8" ", u8"│"},
+	{u8"╰", u8"─", u8"╯"}
+};
+static const Simple::Utility::BorderStyle Dashed = {
+	u8"╌", u8"╎",
+	{u8"╌", u8"╌", u8"╌"},
+	{u8"╎", u8" ", u8"╎"},
+	{u8"╌", u8"╌", u8"╌"}
+};
 
 #endif
