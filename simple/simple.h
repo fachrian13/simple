@@ -289,6 +289,21 @@ namespace Simple {
 		WhiteSmoke = 255
 	};
 
+	class RowType {
+	public:
+		std::string Left;
+		std::string Middle;
+		std::string Right;
+	};
+	class BorderStyle {
+	public:
+		std::string Horizontal;
+		std::string Vertical;
+		RowType Top;
+		RowType Middle;
+		RowType Bottom;
+	};
+
 	class Rectangle final {
 	public:
 		int Left = 0;
@@ -700,21 +715,6 @@ namespace Simple {
 		};
 	}
 	namespace Utility {
-		class RowType {
-		public:
-			std::string Left;
-			std::string Middle;
-			std::string Right;
-		};
-		class BorderStyle {
-		public:
-			std::string Horizontal;
-			std::string Vertical;
-			RowType Top;
-			RowType Middle;
-			RowType Bottom;
-		};
-
 		template<class Type, class... Args>
 		std::vector<Type> ToVector(Args&&... args) {
 			return std::vector<Type>{ std::forward<Args>(args)... };
@@ -1681,7 +1681,7 @@ namespace Simple {
 		Border(std::shared_ptr<Simple::Base::Renderable> element) :
 			Modifier(std::move(element)) {
 		}
-		Border(std::shared_ptr<Simple::Base::Renderable> element, Utility::BorderStyle style) :
+		Border(std::shared_ptr<Simple::Base::Renderable> element, BorderStyle style) :
 			Modifier(std::move(element)),
 			style(style) {
 		}
@@ -1715,7 +1715,7 @@ namespace Simple {
 		}
 
 	private:
-		Utility::BorderStyle style = {
+		BorderStyle style = {
 			"-", "|",
 			{"+", "+", "+"},
 			{"+", "+", "+"},
@@ -1849,7 +1849,7 @@ auto Background(Simple::Color color) -> std::function<std::shared_ptr<Simple::Ba
 auto Border(std::shared_ptr<Simple::Base::Renderable> element) {
 	return std::make_shared<Simple::Border>(std::move(element));
 }
-auto BorderStyle(Simple::Utility::BorderStyle style) -> std::function<std::shared_ptr<Simple::Base::Renderable>(std::shared_ptr<Simple::Base::Renderable>)> {
+auto BorderStyle(Simple::BorderStyle style) -> std::function<std::shared_ptr<Simple::Base::Renderable>(std::shared_ptr<Simple::Base::Renderable>)> {
 	return  [style](std::shared_ptr<Simple::Base::Renderable> element) {
 		return std::make_shared<Simple::Border>(std::move(element), style);
 		};
@@ -1862,37 +1862,37 @@ auto operator |(
 	return nvalue(std::move(rvalue));
 }
 
-static const Simple::Utility::BorderStyle Ascii = {
+static const Simple::BorderStyle Ascii = {
 	"-", "|",
 	{"+", "+", "+"},
 	{"+", "+", "+"},
 	{"+", "+", "+"}
 };
-static const Simple::Utility::BorderStyle Line = {
+static const Simple::BorderStyle Line = {
 	u8"━", u8"┃",
 	{u8"┏", u8"┳", u8"┓"},
 	{u8"┣", u8"╋", u8"┫"},
 	{u8"┗", u8"┻", u8"┛"}
 };
-static const Simple::Utility::BorderStyle DoubleLine = {
+static const Simple::BorderStyle DoubleLine = {
 	u8"═", u8"║",
 	{u8"╔", u8"╦", u8"╗"},
 	{u8"╠", u8"╬", u8"╣"},
 	{u8"╚", u8"╩", u8"╝"}
 };
-static const Simple::Utility::BorderStyle None = {
+static const Simple::BorderStyle None = {
 	" ", " ",
 	{" ", " ", " "},
 	{" ", " ", " "},
 	{" ", " ", " "}
 };
-static const Simple::Utility::BorderStyle Rounded = {
+static const Simple::BorderStyle Rounded = {
 	u8"─", u8"│",
 	{u8"╭", u8"─", u8"╮"},
 	{u8"│", u8" ", u8"│"},
 	{u8"╰", u8"─", u8"╯"}
 };
-static const Simple::Utility::BorderStyle Dashed = {
+static const Simple::BorderStyle Dashed = {
 	u8"╌", u8"╎",
 	{u8"╌", u8"╌", u8"╌"},
 	{u8"╎", u8" ", u8"╎"},
