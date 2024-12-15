@@ -86,7 +86,7 @@ namespace Simple {
 		Purple2 = 53,
 		Indigo = 54,
 		DarkOrchid = 55,
-		MediumBLue3 = 56,
+		MediumBlue3 = 56,
 		Blue3 = 57,
 		Olive2 = 58,
 		DimGray = 59,
@@ -289,21 +289,22 @@ namespace Simple {
 		WhiteSmoke = 255
 	};
 
-	class RowType final {
-	public:
-		std::string Left;
-		std::string Middle;
-		std::string Right;
-	};
 	class BorderStyle final {
+	public:
+		class Alignment final {
+		public:
+			std::string Left;
+			std::string Middle;
+			std::string Right;
+		};
+
 	public:
 		std::string Horizontal;
 		std::string Vertical;
-		RowType Top;
-		RowType Middle;
-		RowType Bottom;
+		Alignment Top;
+		Alignment Middle;
+		Alignment Bottom;
 	};
-
 	class Rectangle final {
 	public:
 		int Left = 0;
@@ -502,9 +503,9 @@ namespace Simple {
 			pixels(height* width, style) {
 		}
 		auto At(int y, int x) -> Pixel& {
-			static Pixel decoy;
+			static Pixel dummy;
 			if (y >= this->height || x >= this->width) {
-				return decoy;
+				return dummy;
 			}
 
 			return this->pixels[y * this->width + x];
