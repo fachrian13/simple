@@ -289,13 +289,13 @@ namespace Simple {
 		WhiteSmoke = 255
 	};
 
-	class RowType {
+	class RowType final {
 	public:
 		std::string Left;
 		std::string Middle;
 		std::string Right;
 	};
-	class BorderStyle {
+	class BorderStyle final {
 	public:
 		std::string Horizontal;
 		std::string Vertical;
