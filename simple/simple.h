@@ -865,7 +865,8 @@ namespace Simple {
 				((keyEvent.dwControlKeyState & SHIFT_PRESSED) && keyEvent.wVirtualKeyCode == VK_TAB) ||
 				keyEvent.wVirtualKeyCode == VK_UP ||
 				keyEvent.uChar.AsciiChar == 'k' ||
-				keyEvent.uChar.AsciiChar == 'K') {
+				keyEvent.uChar.AsciiChar == 'K'
+				) {
 				if (this->focusedComponent > 0) {
 					this->components[this->focusedComponent]->Focused(false);
 					this->components[--this->focusedComponent]->Focused(true);
@@ -917,7 +918,8 @@ namespace Simple {
 				((keyEvent.dwControlKeyState & SHIFT_PRESSED) && keyEvent.wVirtualKeyCode == VK_TAB) ||
 				keyEvent.wVirtualKeyCode == VK_LEFT ||
 				keyEvent.uChar.AsciiChar == 'h' ||
-				keyEvent.uChar.AsciiChar == 'H') {
+				keyEvent.uChar.AsciiChar == 'H'
+				) {
 				if (this->focusedComponent > 0) {
 					this->components[this->focusedComponent]->Focused(false);
 					this->components[--this->focusedComponent]->Focused(true);
