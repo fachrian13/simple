@@ -1679,10 +1679,10 @@ namespace Simple {
 	};
 	class Border final : public Base::Modifier {
 	public:
-		Border(std::shared_ptr<Simple::Base::Renderable> element) :
+		Border(std::shared_ptr<Renderable> element) :
 			Modifier(std::move(element)) {
 		}
-		Border(std::shared_ptr<Simple::Base::Renderable> element, BorderStyle style) :
+		Border(std::shared_ptr<Renderable> element, BorderStyle style) :
 			Modifier(std::move(element)),
 			style(style) {
 		}
