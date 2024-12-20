@@ -649,6 +649,8 @@ namespace Simple {
 		public:
 			int Height = 0;
 			int Width = 0;
+			int FlexY = 0;
+			int FlexX = 0;
 			Rectangle Dimension;
 		};
 		class Focusable {
@@ -756,20 +758,38 @@ namespace Simple {
 		auto Init() -> void override {
 			Renderable::Height = 0;
 			Renderable::Width = 0;
+			Renderable::FlexX = 0;
+			Renderable::FlexY = 0;
 
 			for (const auto& element : this->elements) {
 				element->Init();
 
 				Renderable::Height += element->Height;
 				Renderable::Width = std::max(Renderable::Width, element->Width);
+				Renderable::FlexX += element->FlexX;
+				Renderable::FlexY += element->FlexY;
 			}
 		}
 		auto Set(Rectangle dimension) -> void override {
 			Renderable::Set(dimension);
 
+			int spaceY = (Renderable::Dimension.Bottom - Renderable::Dimension.Top - Renderable::Height) / (Renderable::FlexY == 0 ? 1 : Renderable::FlexY);
+			int spaceX = (Renderable::Dimension.Right - Renderable::Dimension.Left - Renderable::Width) / (Renderable::FlexX == 0 ? 1 : Renderable::FlexX);
+
 			for (const auto& element : this->elements) {
-				dimension.Right = dimension.Left + element->Width;
-				dimension.Bottom = dimension.Top + element->Height;
+				if (element->FlexX == 1) {
+					//dimension.Right = dimension.Left + Renderable::Dimension.Right;
+				}
+				else {
+					dimension.Right = dimension.Left + element->Width;
+				}
+
+				if (element->FlexY == 1) {
+					dimension.Bottom = dimension.Top + element->Height + spaceY;
+				}
+				else {
+					dimension.Bottom = dimension.Top + element->Height;
+				}
 
 				element->Set(dimension);
 
@@ -794,20 +814,38 @@ namespace Simple {
 		auto Init() -> void override {
 			Renderable::Height = 0;
 			Renderable::Width = 0;
+			Renderable::FlexX = 0;
+			Renderable::FlexY = 0;
 
 			for (const auto& element : this->elements) {
 				element->Init();
 
 				Renderable::Height = std::max(Renderable::Height, element->Height);
 				Renderable::Width += element->Width;
+				Renderable::FlexX += element->FlexX;
+				Renderable::FlexY += element->FlexY;
 			}
 		}
 		auto Set(Rectangle dimension) -> void override {
 			Renderable::Set(dimension);
 
+			int spaceY = (Renderable::Dimension.Bottom - Renderable::Dimension.Top - Renderable::Height) / (Renderable::FlexY == 0 ? 1 : Renderable::FlexY);
+			int spaceX = (Renderable::Dimension.Right - Renderable::Dimension.Left - Renderable::Width) / (Renderable::FlexX == 0 ? 1 : Renderable::FlexX);
+
 			for (const auto& element : this->elements) {
-				dimension.Right = dimension.Left + element->Width;
-				dimension.Bottom = dimension.Top + element->Height;
+				if (element->FlexX == 1) {
+					dimension.Right = dimension.Left + element->Width + spaceX;
+				}
+				else {
+					dimension.Right = dimension.Left + element->Width;
+				}
+
+				if (element->FlexY == 1) {
+					//dimension.Bottom = dimension.Top + element->Height + spaceY;
+				}
+				else {
+					dimension.Bottom = dimension.Top + element->Height;
+				}
 
 				element->Set(dimension);
 
@@ -837,7 +875,10 @@ namespace Simple {
 			// Render value kedalam buffer
 			for (int y = Renderable::Dimension.Top, i = 0; y < Renderable::Dimension.Bottom; ++y) {
 				for (int x = Renderable::Dimension.Left; x < Renderable::Dimension.Right; ++x, ++i) {
-					buf.At(y, x).Value = this->value[i];
+					if (i < this->value.size()) {
+						buf.At(y, x).Value = this->value[i];
+					}
+					else { return; }
 				}
 			}
 		}
@@ -1723,6 +1764,38 @@ namespace Simple {
 			{"+", "+", "+"}
 		};
 	};
+	class FlexX final : public Base::Modifier {
+	public:
+		FlexX(std::shared_ptr<Renderable> element) :
+			Modifier(std::move(element)) {
+		}
+
+		auto Init() -> void override {
+			Modifier::Init();
+			Modifier::FlexX = 1;
+			Modifier::FlexY = Renderable::FlexY;
+
+			Renderable::Height = Modifier::Height;
+			Renderable::Width = Modifier::Width;
+			Renderable::FlexX = 1;
+		}
+	};
+	class FlexY final : public Base::Modifier {
+	public:
+		FlexY(std::shared_ptr<Renderable> element) :
+			Modifier(std::move(element)) {
+		}
+
+		auto Init() -> void override {
+			Modifier::Init();
+			Modifier::FlexY = 1;
+			Modifier::FlexX = Renderable::FlexX;
+
+			Renderable::Height = Modifier::Height;
+			Renderable::Width = Modifier::Width;
+			Renderable::FlexY = 1;
+		}
+	};
 }
 
 template<class... Args>
@@ -1854,6 +1927,30 @@ auto BorderStyle(Simple::BorderStyle style) -> std::function<std::shared_ptr<Sim
 	return  [style](std::shared_ptr<Simple::Base::Renderable> element) {
 		return std::make_shared<Simple::Border>(std::move(element), style);
 		};
+}
+auto FlexY(std::shared_ptr<Simple::Base::Renderable> element) -> std::shared_ptr<Simple::Base::Renderable> {
+	return std::make_shared<Simple::FlexY>(std::move(element));
+}
+auto FlexX(std::shared_ptr<Simple::Base::Renderable> element) -> std::shared_ptr<Simple::Base::Renderable> {
+	return std::make_shared<Simple::FlexX>(std::move(element));
+}
+auto CenterY(std::shared_ptr<Simple::Base::Renderable> element) -> std::shared_ptr<Simple::Base::Renderable> {
+	return FlexY(
+		VLayout(
+			FlexY(Text("")),
+			std::move(element),
+			FlexY(Text(""))
+		)
+	);
+}
+auto CenterX(std::shared_ptr<Simple::Base::Renderable> element) -> std::shared_ptr<Simple::Base::Renderable> {
+	return FlexX(
+		HLayout(
+			FlexX(Text("")),
+			std::move(element),
+			FlexX(Text(""))
+		)
+	);
 }
 
 auto operator |(

@@ -105,26 +105,28 @@ int main() {
 	auto bDaftar = Button("Daftar");
 	auto bExit = Button("Exit", [&running]() { running = false; });
 
-	auto vLayout = VLayout(
-		Text("PENDAFTARAN MAHASISWA BARU") | BorderStyle(DoubleLine),
-		Text("Nama Lengkap"),
-		HLayout(iNamaDepan, Text(" "), iNamaBelakang),
-		Text("Jenis Kelamin"),
-		HLayout(rLakiLaki, Text(" "), rPerempuan),
-		Text("Alamat Rumah"),
-		iAlamat,
-		Text("Agama"),
-		HLayout(rIslam, Text(" "), rKristen1, Text(" "), rKristen2),
-		HLayout(rHindu, Text(" "), rBuddha, Text(" "), rKonghuchu),
-		Text("Nomor Handphone"),
-		iNoHP,
-		Text("Jurusan yang dituju"),
-		dJurusan,
-		cbTnC,
-		cbAgree,
-		bDaftar,
-		bExit
-	) | BorderStyle(Rounded);
+	auto vLayout = //HLayout(
+		VLayout(
+			Text("PENDAFTARAN MAHASISWA BARU") | CenterX | BorderStyle(DoubleLine) | FlexX,
+			Text("Nama Lengkap"),
+			HLayout(iNamaDepan, Text(" "), iNamaBelakang),
+			Text("Jenis Kelamin"),
+			HLayout(rLakiLaki, Text(" "), rPerempuan),
+			Text("Alamat Rumah"),
+			iAlamat,
+			Text("Agama"),
+			HLayout(rIslam, Text(" "), rKristen1, Text(" "), rKristen2),
+			HLayout(rHindu, Text(" "), rBuddha, Text(" "), rKonghuchu),
+			Text("Nomor Handphone"),
+			iNoHP,
+			Text("Jurusan yang dituju"),
+			dJurusan,
+			cbTnC,
+			cbAgree,
+			bDaftar,
+			bExit
+		) | BorderStyle(Rounded) | CenterX;
+	//);
 
 	auto vContainer = VContainer(
 		HContainer(iNamaDepan, iNamaBelakang),
@@ -156,9 +158,7 @@ int main() {
 				update = false;
 				mainBuffer.Clear();
 				vLayout->Init();
-				int x = (csbi.dwSize.X - vLayout->Width) / 2;
-				int y = (csbi.dwSize.Y - vLayout->Height) / 2;
-				vLayout->Set({ x, y, x + vLayout->Width, y + vLayout->Height });
+				vLayout->Set({ 0, 0, csbi.dwSize.X, csbi.dwSize.Y });
 				vLayout->Render(mainBuffer);
 				std::cout << "\x1b[H" << mainBuffer.ToString() << std::flush;
 			}
