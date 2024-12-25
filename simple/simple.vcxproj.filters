@@ -18,6 +18,42 @@
     <ClInclude Include="simple.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="simple\color.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\pixel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\canvas.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\renderable\renderable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\renderable\text.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\renderable\vertical_layout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\renderable\horizontal_layout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\renderable\vertical_filler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\renderable\horizontal_filler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\modifier\foreground.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\modifier\modifier.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\modifier\background.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="simple.cpp">
