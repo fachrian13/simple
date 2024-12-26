@@ -87,6 +87,18 @@
     <ClInclude Include="simple\modifier\strikethrough.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="simple\modifier\vertical_flex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\modifier\horizontal_flex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\modifier\flex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\renderable\center.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="simple.cpp">

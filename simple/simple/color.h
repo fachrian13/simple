@@ -314,6 +314,16 @@ namespace simple {
 			this->green = std::stoi(hex.substr(3, 2), nullptr, 16);
 			this->blue = std::stoi(hex.substr(5, 2), nullptr, 16);
 		}
+		color(const char* hex) :
+			color_type(type::RGB) {
+			if (strlen(hex) != 7 && hex[0] != '#') {
+				return;
+			}
+
+			this->red = std::stoi(std::string(hex + 1, 2), nullptr, 16);
+			this->green = std::stoi(std::string(hex + 3, 2), nullptr, 16);
+			this->blue = std::stoi(std::string(hex + 5, 2), nullptr, 16);
+		}
 		void foreground(std::string& str) {
 			str += "\x1b[";
 			switch (this->color_type) {
