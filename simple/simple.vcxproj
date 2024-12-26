@@ -132,6 +132,7 @@
     <ClInclude Include="simple\canvas.h" />
     <ClInclude Include="simple\color.h" />
     <ClInclude Include="simple\modifier\background.h" />
+    <ClInclude Include="simple\modifier\border.h" />
     <ClInclude Include="simple\modifier\foreground.h" />
     <ClInclude Include="simple\modifier\modifier.h" />
     <ClInclude Include="simple\pixel.h" />

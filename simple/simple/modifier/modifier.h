@@ -28,7 +28,7 @@ namespace simple {
 			this->element->render(canvas);
 		}
 
-	private:
+	protected:
 		std::shared_ptr<renderable> element;
 	};
 }

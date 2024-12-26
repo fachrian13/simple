@@ -7,8 +7,12 @@
 #include "simple/renderable/horizontal_filler.h"
 #include "simple/modifier/foreground.h"
 #include "simple/modifier/background.h"
+#include "simple/modifier/border.h"
+#include <windows.h>
 
 int main() {
+	SetConsoleOutputCP(CP_UTF8);
+
 	simple::canvas c = simple::canvas(20, 100, simple::pixel(simple::palette16::default_color, simple::palette16::default_color, "."));
 
 	auto vl = vlayout(
@@ -28,13 +32,13 @@ int main() {
 				),
 				text("VERTICAL123 "),
 				text("VERTICAL1234 ")
-			),
+			) | border_rounded,
 			text("HORIZONTAL123 "),
 			text("HORIZONTAL1234 ")
 		),
 		text("VERTICAL123 "),
 		text("VERTICAL1234 ")
-	) | foreground(simple::palette16::black) | background(simple::palette256::cornflower_blue4);
+	) | foreground(simple::palette16::black) | background(simple::palette256::cornflower_blue4) | border_double_line;
 	vl->init();
 	vl->set({ 0, 0, 100, 20 });
 	vl->render(c);

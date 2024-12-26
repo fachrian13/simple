@@ -78,6 +78,8 @@ namespace simple {
 					}
 
 					str += next.character;
+
+					prev = next;
 				}
 			}
 			str += "\x1b[m";
@@ -125,6 +127,8 @@ namespace simple {
 					}
 
 					ost << next.character;
+
+					prev = next;
 				}
 			}
 			ost << "\x1b[m";
@@ -173,10 +177,17 @@ namespace simple {
 					}
 
 					str += next.character;
+
+					prev = next;
 				}
 			}
 			str += "\x1b[m";
 			return std::move(str);
+
+			/* versi simple tapi saya lebih memilih yang rumit */
+			/*std::string str;
+			this->render(str);
+			return std::move(str);*/
 		}
 
 	private:

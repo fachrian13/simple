@@ -62,8 +62,8 @@ namespace simple {
 		bool invisible = false;
 		bool strikethrough = false;
 
-		color background = palette16::default_color;
 		color foreground = palette16::default_color;
+		color background = palette16::default_color;
 
 		std::string character = " ";
 	};
