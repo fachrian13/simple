@@ -54,6 +54,39 @@
     <ClInclude Include="simple\modifier\background.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="simple\modifier\border.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\renderable\horizontal_center.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\renderable\vertical_center.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\modifier\bold.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\modifier\dim.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\modifier\italic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\modifier\underline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\modifier\blink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\modifier\invert.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\modifier\invisible.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\modifier\strikethrough.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="simple.cpp">

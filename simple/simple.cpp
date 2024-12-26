@@ -10,6 +10,9 @@
 #include "simple/modifier/border.h"
 #include "simple/renderable/horizontal_center.h"
 #include "simple/renderable/vertical_center.h"
+#include "simple/modifier/blink.h"
+#include "simple/modifier/italic.h"
+#include "simple/modifier/strikethrough.h"
 #include <windows.h>
 
 int main() {
@@ -31,7 +34,7 @@ int main() {
 					text("HORIZONTAL12 "),
 					text("HORIZONTAL123 "),
 					text("HORIZONTAL1234 ")
-				) | border_dashed,
+				) | italic,
 				text("VERTICAL123 "),
 				text("VERTICAL1234 ")
 			) | border_rounded,
@@ -40,7 +43,7 @@ int main() {
 		) | border_line,
 		text("VERTICAL123 "),
 		text("VERTICAL1234 ")
-	) | foreground(simple::palette16::black) | background(simple::palette256::cornflower_blue4) | border_double_line;
+	) | background(simple::palette256::cornflower_blue4) | border_double_line | italic | strikethrough;
 	vl->init();
 	vl->set({ 0, 0, 100, 20 });
 	vl->render(c);

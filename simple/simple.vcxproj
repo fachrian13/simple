@@ -132,9 +132,17 @@
     <ClInclude Include="simple\canvas.h" />
     <ClInclude Include="simple\color.h" />
     <ClInclude Include="simple\modifier\background.h" />
+    <ClInclude Include="simple\modifier\blink.h" />
+    <ClInclude Include="simple\modifier\bold.h" />
     <ClInclude Include="simple\modifier\border.h" />
+    <ClInclude Include="simple\modifier\dim.h" />
     <ClInclude Include="simple\modifier\foreground.h" />
+    <ClInclude Include="simple\modifier\invert.h" />
+    <ClInclude Include="simple\modifier\invisible.h" />
+    <ClInclude Include="simple\modifier\italic.h" />
     <ClInclude Include="simple\modifier\modifier.h" />
+    <ClInclude Include="simple\modifier\strikethrough.h" />
+    <ClInclude Include="simple\modifier\underline.h" />
     <ClInclude Include="simple\pixel.h" />
     <ClInclude Include="simple\renderable\horizontal_center.h" />
     <ClInclude Include="simple\renderable\horizontal_filler.h" />
