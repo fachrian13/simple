@@ -1,4 +1,4 @@
-#ifndef _VERTICAL_LAYOUT_
+﻿#ifndef _VERTICAL_LAYOUT_
 #define _VERTICAL_LAYOUT_
 
 #include "renderable.h"
@@ -22,16 +22,19 @@ namespace simple {
 		void set(rectangle dimension) override {
 			renderable::set(dimension);
 
-			/*
-			* calculate extra space for vertical flex
-			*/
 			int vspace =
 				(renderable::dimension.bottom - renderable::dimension.top - renderable::height) /
 				(renderable::vertical_flex == 0 ? 1 : renderable::vertical_flex);
-
+			int remaining_space =
+				(renderable::dimension.bottom - renderable::dimension.top - renderable::height) %
+				(renderable::vertical_flex == 0 ? 1 : renderable::vertical_flex);
 			for (const auto& element : this->elements) {
 				if (element->vertical_flex == 1) {
 					dimension.bottom = dimension.top + element->height + vspace;
+					if (remaining_space > 0) {
+						++dimension.bottom;
+						--remaining_space;
+					}
 				}
 				else {
 					dimension.bottom = dimension.top + element->height;
@@ -57,8 +60,8 @@ template<typename... T>
 std::shared_ptr<simple::renderable> vlayout(T&&... elements) {
 	return std::make_shared<simple::vertical_layout>(
 		std::vector<std::shared_ptr<simple::renderable>>{
-			std::forward<T>(elements)...
-		}
+		std::forward<T>(elements)...
+	}
 	);
 }
 

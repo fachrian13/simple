@@ -1,4 +1,4 @@
-#ifndef _HORIZONTAL_LAYOUT_
+﻿#ifndef _HORIZONTAL_LAYOUT_
 #define _HORIZONTAL_LAYOUT_
 
 #include "renderable.h"
@@ -22,16 +22,18 @@ namespace simple {
 		void set(rectangle dimension) override {
 			renderable::set(dimension);
 
-			/*
-			* calculate extra space for horizontal flex
-			*/
 			int hspace =
 				(renderable::dimension.right - renderable::dimension.left - renderable::width) /
 				(renderable::horizontal_flex == 0 ? 1 : renderable::horizontal_flex);
-
+			int remaining_space = (renderable::dimension.right - renderable::dimension.left - renderable::width) %
+				(renderable::horizontal_flex == 0 ? 1 : renderable::horizontal_flex);
 			for (const auto& element : this->elements) {
 				if (element->horizontal_flex == 1) {
 					dimension.right = dimension.left + element->width + hspace;
+					if (remaining_space > 0) {
+						++dimension.right;
+						--remaining_space;
+					}
 				}
 				else {
 					dimension.right = dimension.left + element->width;
@@ -57,8 +59,8 @@ template<typename... T>
 std::shared_ptr<simple::renderable> hlayout(T&&... elements) {
 	return std::make_shared<simple::horizontal_layout>(
 		std::vector<std::shared_ptr<simple::renderable>>{
-			std::forward<T>(elements)...
-		}
+		std::forward<T>(elements)...
+	}
 	);
 }
 

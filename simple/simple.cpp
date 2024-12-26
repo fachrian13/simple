@@ -1,4 +1,3 @@
-#include <iostream>
 #include "simple/canvas.h"
 #include "simple/renderable/text.h"
 #include "simple/renderable/vertical_layout.h"
@@ -14,39 +13,26 @@
 #include "simple/modifier/italic.h"
 #include "simple/modifier/strikethrough.h"
 #include <windows.h>
+#include <iostream>
 
 int main() {
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+
 	SetConsoleOutputCP(CP_UTF8);
 
-	simple::canvas c = simple::canvas(20, 100);
+	simple::canvas canvas(csbi.dwSize.Y, csbi.dwSize.X);
 
-	auto vl = vlayout(
-		text("VERTICAL1 "),
-		text("VERTICAL12 "),
-		hlayout(
-			text("HORIZONTAL1 ") | vcenter | background(simple::palette256::medium_aquamarine3),
-			vlayout(vfiller(), text("HORIZONTAL12 ")) | background(simple::color(89, 123, 187)),
-			vlayout(
-				text("VERTICAL1 ") | hcenter | background(simple::palette256::plum4),
-				hlayout(hfiller(), text("VERTICAL12 ")) | background(simple::palette256::dark_olive_green),
-				hlayout(
-					text("HORIZONTAL1 "),
-					text("HORIZONTAL12 "),
-					text("HORIZONTAL123 "),
-					text("HORIZONTAL1234 ")
-				) | italic,
-				text("VERTICAL123 "),
-				text("VERTICAL1234 ")
-			) | border_rounded,
-			text("HORIZONTAL123 "),
-			text("HORIZONTAL1234 ")
-		) | border_line,
-		text("VERTICAL123 "),
-		text("VERTICAL1234 ")
-	) | background(simple::palette256::cornflower_blue4) | border_double_line | italic | strikethrough;
-	vl->init();
-	vl->set({ 0, 0, 100, 20 });
-	vl->render(c);
+	auto vLayout = vlayout(
+		hlayout(text("top-left"), hfiller(), text("top-center"), hfiller(), text("top-right")),
+		vfiller(),
+		hlayout(text("middle-left"), hfiller(), text("middle-center"), hfiller(), text("middle-right")),
+		vfiller(),
+		hlayout(text("bottom-left"), hfiller(), text("bottom-center"), hfiller(), text("bottom-right"))
+	) | border_rounded;
+	vLayout->init();
+	vLayout->set({ 0, 0, canvas.get_width(), canvas.get_height() });
+	vLayout->render(canvas);
 
-	std::cout << c.render();
+	std::cout << canvas.render();
 }
