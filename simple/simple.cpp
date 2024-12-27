@@ -1,99 +1,63 @@
 #include "simple/canvas.h"
 #include "simple/renderable/text.h"
 #include "simple/renderable/vertical_layout.h"
-#include "simple/renderable/horizontal_layout.h"
-#include "simple/renderable/vertical_filler.h"
-#include "simple/renderable/horizontal_filler.h"
-#include "simple/modifier/foreground.h"
-#include "simple/modifier/background.h"
+#include "simple/focusable/button.h"
 #include "simple/modifier/border.h"
-#include "simple/renderable/horizontal_center.h"
-#include "simple/renderable/vertical_center.h"
-#include "simple/modifier/blink.h"
-#include "simple/modifier/italic.h"
-#include "simple/modifier/strikethrough.h"
-#include "simple/modifier/vertical_flex.h"
 #include "simple/modifier/horizontal_flex.h"
-#include "simple/renderable/center.h"
-#include <windows.h>
+#include "simple/renderable/horizontal_layout.h"
+#include "simple/focusable/input.h"
+#include "simple/focusable/vertical_container.h"
+#include "simple/focusable/horizontal_container.h"
 #include <iostream>
 
 int main() {
-	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-
 	SetConsoleOutputCP(CP_UTF8);
 
-	simple::canvas canvas(csbi.srWindow.Bottom - csbi.srWindow.Top + 1, csbi.srWindow.Right - csbi.srWindow.Left + 1);
+	simple::canvas canvas = simple::canvas(20, 100);
+
+	auto iUsername = input("username");
+	auto iPassword = input();
+	iPassword->hide = true;
+	iPassword->limit = 8;
+	iPassword->pattern = isdigit;
+	auto bLogin = button("login");
+	auto bExit = button("exit", []() { exit(0); });
 
 	auto vLayout = vlayout(
-		hlayout(
-			text("top-left") | border_rounded,
-			hlayout(
-				hfiller(),
-				text("-- horizontal space --"),
-				hfiller()
-			) | border_rounded | hflex,
-			text("top-center") | border_rounded,
-			hlayout(
-				hfiller(),
-				text("-- horizontal space --"),
-				hfiller()
-			) | border_rounded | hflex,
-			text("top-right") | border_rounded
-		),
-		vlayout(
-			vfiller() | border_rounded,
-			hlayout(
-				hfiller(),
-				text("-- space using vertical layout --"),
-				hfiller()
-			) | border_rounded,
-			vfiller() | border_rounded
-		) | border_rounded | vflex,
-		hlayout(
-			text("middle-left") | border_rounded,
-			hlayout(
-				hfiller(),
-				text("-- horizontal space --"),
-				hfiller()
-			) | border_rounded | hflex,
-			text("middle-center") | border_rounded,
-			hlayout(
-				hfiller(),
-				text("-- horizontal space --"),
-				hfiller()
-			) | border_rounded | hflex,
-			text("middle-right") | border_rounded
-		),
-		hlayout(
-			hfiller() | border_rounded,
-			vlayout(
-				vfiller(),
-				text("-- space using horizontal layout --"),
-				vfiller()
-			) | border_rounded,
-			hfiller() | border_rounded
-		) | border_rounded | vflex,
-		hlayout(
-			text("bottom-left") | border_rounded,
-			hlayout(
-				hfiller(),
-				text("-- horizontal space --"),
-				hfiller()
-			) | border_rounded | hflex,
-			text("bottom-center") | border_rounded,
-			hlayout(
-				hfiller(),
-				text("-- horizontal space --"),
-				hfiller()
-			) | border_rounded | hflex,
-			text("bottom-right") | border_rounded
-		)
+		hlayout(text("username :"), iUsername),
+		hlayout(text("password :"), iPassword),
+		hlayout(bLogin, bExit)
 	) | border_rounded;
-	vLayout->init();
-	vLayout->set({ 0, 0, canvas.get_width(), canvas.get_height() });
-	vLayout->render(canvas);
 
-	std::cout << canvas.render();
+	auto vContainer = vcontainer(
+		iUsername,
+		iPassword,
+		hcontainer(bLogin, bExit)
+	);
+	vContainer->focused(true);
+
+	bool update = true;
+	bool running = true;
+	INPUT_RECORD input_record[128];
+	DWORD events;
+	HANDLE input_handle = GetStdHandle(STD_INPUT_HANDLE);
+	while (running) {
+		ReadConsoleInput(input_handle, input_record, 128, &events);
+		for (DWORD i = 0; i < events; ++i) {
+			if (input_record[i].EventType == KEY_EVENT && input_record[i].Event.KeyEvent.bKeyDown) {
+				if (vContainer->on_key(input_record[i].Event.KeyEvent)) {
+					update = true;
+				}
+			}
+		}
+
+		if (update) {
+			canvas.clear();
+			vLayout->init();
+			vLayout->set({ 0, 0, 100, 20 });
+			vLayout->render(canvas);
+			std::cout << "\x1b[H" << canvas.render() << std::flush;
+			update = false;
+		}
+	}
 }

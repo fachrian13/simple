@@ -5,6 +5,9 @@
 #include "../renderable/renderable.h"
 
 namespace simple {
+	/*
+	* @brief: a modifier class that can be used to modify the behavior of a renderable object
+	*/
 	class modifier : public renderable {
 	public:
 		modifier(std::shared_ptr<renderable> element) :
@@ -14,7 +17,7 @@ namespace simple {
 		void init() override {
 			this->element->init();
 
-			/* copy all element information to this class */
+			// copy the properties of the element
 			renderable::height = element->height;
 			renderable::width = element->width;
 			renderable::vertical_flex = element->vertical_flex;

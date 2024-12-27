@@ -131,6 +131,11 @@
     <ClInclude Include="simple.h" />
     <ClInclude Include="simple\canvas.h" />
     <ClInclude Include="simple\color.h" />
+    <ClInclude Include="simple\focusable\button.h" />
+    <ClInclude Include="simple\focusable\focusable.h" />
+    <ClInclude Include="simple\focusable\horizontal_container.h" />
+    <ClInclude Include="simple\focusable\input.h" />
+    <ClInclude Include="simple\focusable\vertical_container.h" />
     <ClInclude Include="simple\modifier\background.h" />
     <ClInclude Include="simple\modifier\blink.h" />
     <ClInclude Include="simple\modifier\bold.h" />

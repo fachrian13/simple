@@ -99,6 +99,21 @@
     <ClInclude Include="simple\renderable\center.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="simple\focusable\focusable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\focusable\button.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\focusable\input.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\focusable\vertical_container.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simple\focusable\horizontal_container.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="simple.cpp">

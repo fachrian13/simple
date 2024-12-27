@@ -382,10 +382,12 @@ namespace simple {
 			str += "m";
 			return std::move(str);
 
-			/* versi simple tapi saya lebih memilih yang rumit */
-			/*std::string str;
-			this->foreground(str);
-			return std::move(str);*/
+			// simple version but I prefer the complicated one
+			/*
+			* std::string str;
+			* this->foreground(str);
+			* return std::move(str);
+			*/
 		}
 		void background(std::string& str) {
 			str += "\x1b[";
@@ -445,10 +447,12 @@ namespace simple {
 			str += "m";
 			return std::move(str);
 
-			/* versi simple tapi saya lebih memilih yang rumit */
-			/*std::string str;
-			this->background(str);
-			return std::move(str);*/
+			// simple version but I prefer the complicated one
+			/*
+			* std::string str;
+			* this->background(str);
+			* return std::move(str);
+			*/
 		}
 		bool operator ==(const color& other) {
 			return
@@ -466,7 +470,6 @@ namespace simple {
 		int blue = 0;
 
 	private:
-		/* used in class only */
 		enum class type : int {
 			PALETTE16,
 			PALETTE256,

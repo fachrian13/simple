@@ -16,13 +16,11 @@ namespace simple {
 		}
 		void render(canvas& canvas) override {
 			int x = renderable::dimension.left;
-
 			for (const auto& i : this->value) {
 				if (i == '\n') {
 					continue;
 				}
-				canvas.at(renderable::dimension.top, x).character = i;
-				++x;
+				canvas.at(renderable::dimension.top, x++).character = i;
 			}
 		}
 

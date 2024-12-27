@@ -12,22 +12,25 @@ namespace simple {
 
 		void init() override {
 			renderable::init();
+			this->total_vertical_flex = 0;
 			for (const auto& element : this->elements) {
 				element->init();
 				renderable::height += element->height;
 				renderable::width = std::max(renderable::width, element->width);
-				renderable::vertical_flex += element->vertical_flex;
+				this->total_vertical_flex += element->vertical_flex;
 			}
 		}
 		void set(rectangle dimension) override {
 			renderable::set(dimension);
 
+			// calculate vertical space and remaining space for each element
 			int vspace =
 				(renderable::dimension.bottom - renderable::dimension.top - renderable::height) /
-				(renderable::vertical_flex == 0 ? 1 : renderable::vertical_flex);
+				(this->total_vertical_flex == 0 ? 1 : this->total_vertical_flex);
 			int remaining_space =
 				(renderable::dimension.bottom - renderable::dimension.top - renderable::height) %
-				(renderable::vertical_flex == 0 ? 1 : renderable::vertical_flex);
+				(this->total_vertical_flex == 0 ? 1 : this->total_vertical_flex);
+
 			for (const auto& element : this->elements) {
 				if (element->vertical_flex == 1) {
 					dimension.bottom = dimension.top + element->height + vspace;
@@ -40,8 +43,14 @@ namespace simple {
 					dimension.bottom = dimension.top + element->height;
 				}
 
-				element->set(dimension);
+				if (element->horizontal_flex == 1) {
+					dimension.right = renderable::dimension.right;
+				}
+				else {
+					dimension.right = dimension.left + element->width;
+				}
 
+				element->set(dimension);
 				dimension.top = dimension.bottom;
 			}
 		}
@@ -52,6 +61,7 @@ namespace simple {
 		}
 
 	private:
+		int total_vertical_flex = 0;
 		std::vector<std::shared_ptr<renderable>> elements;
 	};
 }

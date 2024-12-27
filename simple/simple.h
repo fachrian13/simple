@@ -1,4 +1,4 @@
-﻿#ifndef _SIMPLE_
+﻿#ifndef _SIMPLE_		
 #define _SIMPLE_
 #define NOMINMAX
 

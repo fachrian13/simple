@@ -12,21 +12,25 @@ namespace simple {
 
 		void init() override {
 			renderable::init();
+			this->total_horizontal_flex = 0;
 			for (const auto& element : this->elements) {
 				element->init();
 				renderable::width += element->width;
 				renderable::height = std::max(renderable::height, element->height);
-				renderable::horizontal_flex += element->horizontal_flex;
+				this->total_horizontal_flex += element->horizontal_flex;
 			}
 		}
 		void set(rectangle dimension) override {
 			renderable::set(dimension);
-
+			
+			// calculate horizontal space and remaining space for each element
 			int hspace =
 				(renderable::dimension.right - renderable::dimension.left - renderable::width) /
-				(renderable::horizontal_flex == 0 ? 1 : renderable::horizontal_flex);
-			int remaining_space = (renderable::dimension.right - renderable::dimension.left - renderable::width) %
-				(renderable::horizontal_flex == 0 ? 1 : renderable::horizontal_flex);
+				(this->total_horizontal_flex == 0 ? 1 : this->total_horizontal_flex);
+			int remaining_space =
+				(renderable::dimension.right - renderable::dimension.left - renderable::width) %
+				(this->total_horizontal_flex == 0 ? 1 : this->total_horizontal_flex);
+
 			for (const auto& element : this->elements) {
 				if (element->horizontal_flex == 1) {
 					dimension.right = dimension.left + element->width + hspace;
@@ -39,8 +43,14 @@ namespace simple {
 					dimension.right = dimension.left + element->width;
 				}
 
-				element->set(dimension);
+				if (element->vertical_flex == 1) {
+					dimension.bottom = renderable::dimension.bottom;
+				}
+				else {
+					dimension.bottom = dimension.top + element->height;
+				}
 
+				element->set(dimension);
 				dimension.left = dimension.right;
 			}
 		}
@@ -51,6 +61,7 @@ namespace simple {
 		}
 
 	private:
+		int total_horizontal_flex = 0;
 		std::vector<std::shared_ptr<renderable>> elements;
 	};
 }

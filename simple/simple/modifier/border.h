@@ -51,19 +51,19 @@ namespace simple {
 		void render(canvas& canvas) override {
 			modifier::render(canvas);
 
-			/* render every corner */
+			// render every corner
 			canvas.at(renderable::dimension.top, renderable::dimension.left).character = this->style.top.left;
 			canvas.at(renderable::dimension.top, renderable::dimension.right - 1).character = this->style.top.right;
 			canvas.at(renderable::dimension.bottom - 1, renderable::dimension.left).character = this->style.bottom.left;
 			canvas.at(renderable::dimension.bottom - 1, renderable::dimension.right - 1).character = this->style.bottom.right;
 
-			/* render vertical line */
+			// render vertical line
 			for (int y = renderable::dimension.top + 1; y < renderable::dimension.bottom - 1; ++y) {
 				canvas.at(y, renderable::dimension.left).character = this->style.vertical;
 				canvas.at(y, renderable::dimension.right - 1).character = this->style.vertical;
 			}
 
-			/* render horizontal line */
+			// render horizontal line
 			for (int x = renderable::dimension.left + 1; x < renderable::dimension.right - 1; ++x) {
 				canvas.at(renderable::dimension.top, x).character = this->style.horizontal;
 				canvas.at(renderable::dimension.bottom - 1, x).character = this->style.horizontal;

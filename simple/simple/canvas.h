@@ -35,6 +35,9 @@ namespace simple {
 		const pixel& get_style() {
 			return this->style;
 		}
+		void clear() {
+			std::fill(this->pixels.begin(), this->pixels.end(), this->style);
+		}
 		void render(std::string& str) {
 			pixel prev;
 			for (int y = 0; y < this->height; ++y) {
@@ -184,10 +187,12 @@ namespace simple {
 			str += "\x1b[m";
 			return std::move(str);
 
-			/* versi simple tapi saya lebih memilih yang rumit */
-			/*std::string str;
-			this->render(str);
-			return std::move(str);*/
+			// simple version but I prefer the complicated one
+			/*
+			* std::string str;
+			* this->render(str);
+			* return std::move(str);
+			*/
 		}
 
 	private:
