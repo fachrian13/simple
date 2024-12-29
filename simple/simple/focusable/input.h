@@ -116,6 +116,12 @@ namespace simple {
 					return true;
 				}
 				break;
+			case VK_DELETE:
+				if (this->index < this->value.size()) {
+					this->value.erase(this->value.begin() + this->index);
+					return true;
+				}
+				break;
 			default:
 				if (this->pattern(key_event.uChar.AsciiChar) && this->value.size() < this->limit) {
 					this->value.insert(this->value.begin() + this->index++, key_event.uChar.AsciiChar);

@@ -71,8 +71,7 @@ std::shared_ptr<simple::renderable> hlayout(T&&... elements) {
 	return std::make_shared<simple::horizontal_layout>(
 		std::vector<std::shared_ptr<simple::renderable>>{
 		std::forward<T>(elements)...
-	}
-	);
+	});
 }
 
 #endif // !_HORIZONTAL_LAYOUT_

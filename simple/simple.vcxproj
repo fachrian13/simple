@@ -128,10 +128,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="simple\selectable\radiobox.h" />
     <ClInclude Include="simple.h" />
     <ClInclude Include="simple\canvas.h" />
     <ClInclude Include="simple\color.h" />
     <ClInclude Include="simple\focusable\button.h" />
+    <ClInclude Include="simple\focusable\dropdown.h" />
     <ClInclude Include="simple\focusable\focusable.h" />
     <ClInclude Include="simple\focusable\horizontal_container.h" />
     <ClInclude Include="simple\focusable\input.h" />
@@ -154,13 +156,18 @@
     <ClInclude Include="simple\pixel.h" />
     <ClInclude Include="simple\renderable\center.h" />
     <ClInclude Include="simple\renderable\horizontal_center.h" />
-    <ClInclude Include="simple\renderable\horizontal_filler.h" />
+    <ClInclude Include="simple\renderable\horizontal_fill.h" />
     <ClInclude Include="simple\renderable\horizontal_layout.h" />
+    <ClInclude Include="simple\renderable\horizontal_space.h" />
     <ClInclude Include="simple\renderable\renderable.h" />
     <ClInclude Include="simple\renderable\text.h" />
     <ClInclude Include="simple\renderable\vertical_center.h" />
-    <ClInclude Include="simple\renderable\vertical_filler.h" />
+    <ClInclude Include="simple\renderable\vertical_fill.h" />
     <ClInclude Include="simple\renderable\vertical_layout.h" />
+    <ClInclude Include="simple\renderable\vertical_space.h" />
+    <ClInclude Include="simple\selectable\checkbox.h" />
+    <ClInclude Include="simple\selectable\selectable.h" />
+    <ClInclude Include="simple\selectable\toggle.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="simple.cpp" />

@@ -65,8 +65,7 @@ std::shared_ptr<simple::focusable> vcontainer(T&&... elements) {
 	return std::make_shared<simple::vertical_container>(
 		std::vector<std::shared_ptr<simple::focusable>>{
 		std::forward<T>(elements)...
-	}
-	);
+	});
 }
 
 #endif // !_VERTICAL_CONTAINER_
