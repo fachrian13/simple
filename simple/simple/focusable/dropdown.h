@@ -1,4 +1,4 @@
-#ifndef _DROPDOWN_
+﻿#ifndef _DROPDOWN_
 #define _DROPDOWN_
 
 #include "../renderable/renderable.h"
@@ -51,7 +51,7 @@ namespace simple {
 			// if focused, render list values into buffer
 			if (focusable::focused()) {
 				for (int y = renderable::dimension.top, i = this->text_begin; y < renderable::dimension.bottom; ++y, ++i) {
-					for (int x = renderable::dimension.left + 1, ii = 0; x < renderable::dimension.right; ++x, ++ii) {
+					for (int x = renderable::dimension.left + 1, ii = 0; x < renderable::dimension.right - 1; ++x, ++ii) {
 						if (ii < this->values[i].size()) {
 							canvas.at(y, x).character = this->values[i][ii];
 						}
@@ -68,6 +68,15 @@ namespace simple {
 				// render cursor position
 				for (int x = renderable::dimension.left; x < renderable::dimension.right; ++x) {
 					canvas.at(renderable::dimension.top + this->y_cursor, x).invert = false;
+				}
+
+				// render vertical scrollbar
+				if (index != 0) {
+					int pos = this->index * 7 / static_cast<int>(this->values.size());
+					canvas.at(renderable::dimension.top + pos, renderable::dimension.right - 1).character = u8"┃";
+				}
+				else {
+					canvas.at(renderable::dimension.top, renderable::dimension.right - 1).character = u8"┃";
 				}
 
 				return;
