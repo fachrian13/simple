@@ -71,13 +71,8 @@ namespace simple {
 				}
 
 				// render vertical scrollbar
-				if (index != 0) {
-					int pos = this->index * 7 / static_cast<int>(this->values.size());
-					canvas.at(renderable::dimension.top + pos, renderable::dimension.right - 1).character = u8"┃";
-				}
-				else {
-					canvas.at(renderable::dimension.top, renderable::dimension.right - 1).character = u8"┃";
-				}
+				int pos = (this->index < 1 ? 1 : this->index) * 7 / static_cast<int>(this->values.size());
+				canvas.at(renderable::dimension.top + pos, renderable::dimension.right - 1).character = u8"┃";
 
 				return;
 			}
