@@ -107,13 +107,13 @@ static const simple::border_style none = {
 static const simple::border_style rounded = {
 	u8"─", u8"│",
 	{u8"╭", u8"─", u8"╮"},
-	{u8"│", u8" ", u8"│"},
+	{u8"│", u8"┼", u8"│"},
 	{u8"╰", u8"─", u8"╯"}
 };
 static const simple::border_style dashed = {
 	u8"╌", u8"╎",
 	{u8"┌", u8"╌", u8"┐"},
-	{u8"╎", u8" ", u8"╎"},
+	{u8"╎", u8"┼", u8"╎"},
 	{u8"└", u8"╌", u8"┘"}
 };
 
