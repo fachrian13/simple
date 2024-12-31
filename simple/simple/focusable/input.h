@@ -122,6 +122,25 @@ namespace simple {
 					return true;
 				}
 				break;
+			case VK_HOME:
+				if (this->index > 0) {
+					this->index = 0;
+					this->text_begin = 0;
+					this->x_cursor = 0;
+					this->y_cursor = 0;
+					return true;
+				}
+				break;
+			case VK_END:
+				if (this->index < this->value.size()) {
+					this->index = static_cast<int>(this->value.size());
+					int line = this->index / renderable::width;
+					this->x_cursor = this->index % renderable::width;
+					this->y_cursor = std::min(line, this->height - 1);
+					this->text_begin = std::max(0, this->index - (renderable::width * (this->height - 1)) - this->x_cursor);
+					return true;
+				}
+				break;
 			default:
 				if (this->pattern(key_event.uChar.AsciiChar) && this->value.size() < this->limit) {
 					this->value.insert(this->value.begin() + this->index++, key_event.uChar.AsciiChar);

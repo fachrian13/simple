@@ -290,7 +290,6 @@ int main() {
 	d_jurusan->width = 41;
 	auto c_tac = checkbox("saya telah membaca ketentuan");
 	auto c_acc = checkbox("saya menyetujui peraturan kampus");
-	auto t_notifikasi = toggle("notifikasi email");
 	auto b_daftar = button("daftar");
 	bool running = true;
 	auto b_exit = button("exit", [&running]() { running = false; });
@@ -315,9 +314,10 @@ int main() {
 				i_no_hp,
 				text("jurusan yang dituju"),
 				d_jurusan,
-				c_tac,
-				c_acc,
-				t_notifikasi,
+				vlayout(
+					c_tac,
+					c_acc
+				) | hcenter,
 				b_daftar | hflex,
 				b_exit | hflex
 			) | border_rounded,
@@ -337,7 +337,6 @@ int main() {
 		d_jurusan,
 		c_tac,
 		c_acc,
-		t_notifikasi,
 		b_daftar,
 		b_exit
 	);
