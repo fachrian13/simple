@@ -22,14 +22,14 @@
 
 int main() {
 	auto i_nama_depan = input("nama depan");
-	i_nama_depan->width = 20;
+	i_nama_depan->width = 25;
 	auto i_nama_belakang = input("nama belakang");
-	i_nama_belakang->width = 20;
+	i_nama_belakang->width = 25;
 	auto r_laki_laki = radiobox("laki-laki");
 	auto r_perempuan = radiobox("perempuan");
 	auto g_jenis_kelamin = selectable_group(r_laki_laki, r_perempuan);
 	auto i_alamat = input();
-	i_alamat->width = 41;
+	i_alamat->width = 51;
 	i_alamat->height = 3;
 	auto r_islam = radiobox("islam");
 	auto r_kristen = radiobox("kristen katolik");
@@ -39,7 +39,7 @@ int main() {
 	auto r_konghucu = radiobox("konghucu");
 	auto g_agama = selectable_group(r_islam, r_kristen, r_kristen2, r_hindu, r_budha, r_konghucu);
 	auto i_no_hp = input();
-	i_no_hp->width = 41;
+	i_no_hp->width = 51;
 	i_no_hp->limit = 13;
 	i_no_hp->pattern = isdigit;
 	auto d_jurusan = dropdown(
@@ -287,7 +287,7 @@ int main() {
 			"Pemasaran digital"
 		}
 	);
-	d_jurusan->width = 41;
+	d_jurusan->width = 51;
 	auto c_tac = checkbox("saya telah membaca ketentuan");
 	auto c_acc = checkbox("saya menyetujui peraturan kampus");
 	auto b_daftar = button("daftar");

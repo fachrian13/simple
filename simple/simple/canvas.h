@@ -42,35 +42,35 @@ namespace simple {
 			pixel prev;
 			for (int y = 0; y < this->height; ++y) {
 				if (y > 0) {
-					str += "\n";
+					str.append("\n");
 				}
 
 				for (int x = 0; x < this->width; ++x) {
 					pixel& next = this->pixels[y * this->width + x];
 
 					if (prev.bold != next.bold) {
-						str += (next.bold ? "\x1b[1m" : "\x1b[22m");
+						str.append(next.bold ? "\x1b[1m" : "\x1b[22m");
 					}
 					if (prev.dim != next.dim) {
-						str += (next.dim ? "\x1b[2m" : "\x1b[22m");
+						str.append(next.dim ? "\x1b[2m" : "\x1b[22m");
 					}
 					if (prev.italic != next.italic) {
-						str += (next.italic ? "\x1b[3m" : "\x1b[23m");
+						str.append(next.italic ? "\x1b[3m" : "\x1b[23m");
 					}
 					if (prev.underline != next.underline) {
-						str += (next.underline ? "\x1b[4m" : "\x1b[24m");
+						str.append(next.underline ? "\x1b[4m" : "\x1b[24m");
 					}
 					if (prev.blink != next.blink) {
-						str += (next.blink ? "\x1b[5m" : "\x1b[25m");
+						str.append(next.blink ? "\x1b[5m" : "\x1b[25m");
 					}
 					if (prev.invert != next.invert) {
-						str += (next.invert ? "\x1b[7m" : "\x1b[27m");
+						str.append(next.invert ? "\x1b[7m" : "\x1b[27m");
 					}
 					if (prev.invisible != next.invisible) {
-						str += (next.invisible ? "\x1b[8m" : "\x1b[28m");
+						str.append(next.invisible ? "\x1b[8m" : "\x1b[28m");
 					}
 					if (prev.strikethrough != next.strikethrough) {
-						str += (next.strikethrough ? "\x1b[9m" : "\x1b[29m");
+						str.append(next.strikethrough ? "\x1b[9m" : "\x1b[29m");
 					}
 
 					if (prev.background != next.background) {
@@ -80,46 +80,45 @@ namespace simple {
 						next.foreground_color(str);
 					}
 
-					str += next.character;
-
+					str.append(next.character);
 					prev = next;
 				}
 			}
-			str += "\x1b[m";
+			str.append("\x1b[m");
 		}
 		void render(std::ostringstream& ost) {
 			pixel prev;
 			for (int y = 0; y < this->height; ++y) {
 				if (y > 0) {
-					ost << "\n";
+					ost.str("\n");
 				}
 
 				for (int x = 0; x < this->width; ++x) {
 					pixel& next = this->pixels[y * this->width + x];
 
 					if (prev.bold != next.bold) {
-						ost << (next.bold ? "\x1b[1m" : "\x1b[22m");
+						ost.str(next.bold ? "\x1b[1m" : "\x1b[22m");
 					}
 					if (prev.dim != next.dim) {
-						ost << (next.dim ? "\x1b[2m" : "\x1b[22m");
+						ost.str(next.dim ? "\x1b[2m" : "\x1b[22m");
 					}
 					if (prev.italic != next.italic) {
-						ost << (next.italic ? "\x1b[3m" : "\x1b[23m");
+						ost.str(next.italic ? "\x1b[3m" : "\x1b[23m");
 					}
 					if (prev.underline != next.underline) {
-						ost << (next.underline ? "\x1b[4m" : "\x1b[24m");
+						ost.str(next.underline ? "\x1b[4m" : "\x1b[24m");
 					}
 					if (prev.blink != next.blink) {
-						ost << (next.blink ? "\x1b[5m" : "\x1b[25m");
+						ost.str(next.blink ? "\x1b[5m" : "\x1b[25m");
 					}
 					if (prev.invert != next.invert) {
-						ost << (next.invert ? "\x1b[7m" : "\x1b[27m");
+						ost.str(next.invert ? "\x1b[7m" : "\x1b[27m");
 					}
 					if (prev.invisible != next.invisible) {
-						ost << (next.invisible ? "\x1b[8m" : "\x1b[28m");
+						ost.str(next.invisible ? "\x1b[8m" : "\x1b[28m");
 					}
 					if (prev.strikethrough != next.strikethrough) {
-						ost << (next.strikethrough ? "\x1b[9m" : "\x1b[29m");
+						ost.str(next.strikethrough ? "\x1b[9m" : "\x1b[29m");
 					}
 
 					if (prev.background != next.background) {
@@ -129,47 +128,46 @@ namespace simple {
 						next.foreground_color(ost);
 					}
 
-					ost << next.character;
-
+					ost.str(next.character);
 					prev = next;
 				}
 			}
-			ost << "\x1b[m";
+			ost.str("\x1b[m");
 		}
 		std::string render() {
 			std::string str;
 			pixel prev;
 			for (int y = 0; y < this->height; ++y) {
 				if (y > 0) {
-					str += "\n";
+					str.append("\n");
 				}
 
 				for (int x = 0; x < this->width; ++x) {
 					pixel& next = this->pixels[y * this->width + x];
 
 					if (prev.bold != next.bold) {
-						str += (next.bold ? "\x1b[1m" : "\x1b[22m");
+						str.append(next.bold ? "\x1b[1m" : "\x1b[22m");
 					}
 					if (prev.dim != next.dim) {
-						str += (next.dim ? "\x1b[2m" : "\x1b[22m");
+						str.append(next.dim ? "\x1b[2m" : "\x1b[22m");
 					}
 					if (prev.italic != next.italic) {
-						str += (next.italic ? "\x1b[3m" : "\x1b[23m");
+						str.append(next.italic ? "\x1b[3m" : "\x1b[23m");
 					}
 					if (prev.underline != next.underline) {
-						str += (next.underline ? "\x1b[4m" : "\x1b[24m");
+						str.append(next.underline ? "\x1b[4m" : "\x1b[24m");
 					}
 					if (prev.blink != next.blink) {
-						str += (next.blink ? "\x1b[5m" : "\x1b[25m");
+						str.append(next.blink ? "\x1b[5m" : "\x1b[25m");
 					}
 					if (prev.invert != next.invert) {
-						str += (next.invert ? "\x1b[7m" : "\x1b[27m");
+						str.append(next.invert ? "\x1b[7m" : "\x1b[27m");
 					}
 					if (prev.invisible != next.invisible) {
-						str += (next.invisible ? "\x1b[8m" : "\x1b[28m");
+						str.append(next.invisible ? "\x1b[8m" : "\x1b[28m");
 					}
 					if (prev.strikethrough != next.strikethrough) {
-						str += (next.strikethrough ? "\x1b[9m" : "\x1b[29m");
+						str.append(next.strikethrough ? "\x1b[9m" : "\x1b[29m");
 					}
 
 					if (prev.background != next.background) {
@@ -179,12 +177,11 @@ namespace simple {
 						next.foreground_color(str);
 					}
 
-					str += next.character;
-
+					str.append(next.character);
 					prev = next;
 				}
 			}
-			str += "\x1b[m";
+			str.append("\x1b[m");
 			return std::move(str);
 
 			// simple version but I prefer the complicated one
