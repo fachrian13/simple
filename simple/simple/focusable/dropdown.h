@@ -21,25 +21,27 @@ namespace simple {
 			placeholder(std::move(placeholder)),
 			values(values) {
 		}
+		const std::string& get_value() const {
+			return this->selected_value;
+		}
 
 		void init() override {
 			if (renderable::width == 0) {
 				renderable::width = static_cast<int>(
-					std::max(
-						std::max_element(
-							this->values.begin(),
-							this->values.end(),
-							[](const std::string& a, const std::string& b) {
-								return a.size() < b.size();
-							}
-						)->size(),
-						this->placeholder.size()
-					)
+					std::max_element(
+						this->values.begin(),
+						this->values.end(),
+						[](const std::string& a, const std::string& b) {
+							return a.size() < b.size();
+						}
+					)->size()
 					);
+				renderable::width = std::max(renderable::width, static_cast<int>(this->placeholder.size()));
 			}
 
 			renderable::height = focusable::focused() ? std::min(7, static_cast<int>(this->values.size())) : 1;
 		}
+
 		void render(canvas& canvas) override {
 			// render dropdown area
 			for (int y = renderable::dimension.top; y < renderable::dimension.bottom; ++y) {
@@ -120,6 +122,7 @@ namespace simple {
 			// select item
 			if (key_event.wVirtualKeyCode == VK_RETURN) {
 				this->selected_index = this->index;
+				this->selected_value = this->values[this->index];
 				return true;
 			}
 			return false;
@@ -151,6 +154,7 @@ namespace simple {
 		int y_cursor = 0;
 		int text_begin = 0;
 		std::string placeholder;
+		std::string selected_value;
 		std::vector<std::string> values;
 	};
 }

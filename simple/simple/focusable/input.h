@@ -13,6 +13,9 @@ namespace simple {
 		input(std::string placeholder) :
 			placeholder(std::move(placeholder)) {
 		}
+		const std::string& get_value() const {
+			return this->value;
+		}
 
 		void init() override {
 			if (renderable::height == 0) {

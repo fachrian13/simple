@@ -5,6 +5,14 @@
 #include "pixel.h"
 
 namespace simple {
+	class rectangle final {
+	public:
+		int left = 0;
+		int top = 0;
+		int right = 0;
+		int bottom = 0;
+	};
+
 	class canvas final {
 	public:
 		canvas(int height, int width) :
@@ -37,6 +45,13 @@ namespace simple {
 		}
 		void clear() {
 			std::fill(this->pixels.begin(), this->pixels.end(), this->style);
+		}
+		void clear_area(const rectangle& dimension) {
+			for (int y = dimension.top; y < dimension.bottom; ++y) {
+				for (int x = dimension.left; x < dimension.right; ++x) {
+					this->pixels[y * this->width + x] = this->style;
+				}
+			}
 		}
 		void render(std::string& str) {
 			pixel prev;

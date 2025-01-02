@@ -46,12 +46,21 @@ namespace simple {
 				component->selected(false);
 			}
 		}
-		const std::shared_ptr<selectable>& selected() {
+		const std::shared_ptr<selectable> selected() {
 			for (const auto& component : this->components) {
 				if (component->selected()) {
 					return component;
 				}
 			}
+			return nullptr;
+		}
+		bool is_selected() {
+			for (const auto& component : this->components) {
+				if (component->selected()) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 	private:
