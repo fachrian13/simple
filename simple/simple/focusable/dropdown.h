@@ -120,7 +120,8 @@ namespace simple {
 			}
 
 			// select item
-			if (key_event.wVirtualKeyCode == VK_RETURN) {
+			if (key_event.wVirtualKeyCode == VK_RETURN ||
+				key_event.uChar.AsciiChar == ' ') {
 				this->selected_index = this->index;
 				this->selected_value = this->values[this->index];
 				return true;

@@ -17,6 +17,8 @@
 #include "simple/selectable/checkbox.h"
 
 #include "simple/modifier/border.h"
+#include "simple/modifier/foreground.h"
+#include "simple/modifier/background.h"
 
 class app final : public simple::application {
 public:
@@ -36,6 +38,20 @@ private:
 		auto i_alamat = input();
 		i_alamat->height = 3;
 		i_alamat->width = 51;
+		auto formatted_alamat = [&]() {
+			std::string alamat = i_alamat->get_value();
+			
+			// simple calculation
+			if (alamat.size() > 50) {
+				size_t half = alamat.size() / 2;
+				return vlayout(
+					text(alamat.substr(0, half)),
+					text(alamat.substr(half, std::string::npos))
+				);
+			}
+
+			return text(alamat);
+		};
 		auto r_islam = radiobox("Islam");
 		auto r_kristen1 = radiobox("Kristen Katolik");
 		auto r_kristen2 = radiobox("Kristen Protestan");
@@ -141,12 +157,12 @@ private:
 					vlayout(
 						hlayout(text("Nama Lengkap        : "), text(i_nama_depan->get_value()), hspace(), text(i_nama_belakang->get_value())),
 						hlayout(text("Jenis Kelamin       : "), text(gr_jenis_kelamin.selected()->get_name())),
-						hlayout(text("Alamat Rumah        : "), text(i_alamat->get_value())),
+						hlayout(text("Alamat Rumah        : "), formatted_alamat()),
 						hlayout(text("Agama               : "), text(gr_agama.selected()->get_name())),
 						hlayout(text("Nomor Telepon       : "), text(i_hp->get_value())),
 						hlayout(text("Jurusan yang dituju : "), text(d_jurusan->get_value()))
 					) | border_rounded | hcenter,
-					hlayout(b_no, hspace(), b_ok) | hcenter
+					hlayout(b_no, hspace(), b_ok | foreground("#81a1c1")) | hcenter
 				) | border_double_line | center | hflex
 			);
 			auto component = hcontainer(b_no, b_ok);
@@ -183,7 +199,7 @@ private:
 				}
 				else {
 					if (confirm()) {
-						notification("Pendaftaran berhasil");
+						notification("Pendaftaran berhasil.");
 						application::stop();
 					}
 				}
@@ -209,7 +225,7 @@ private:
 				text("Jurusan yang dituju"),
 				d_jurusan,
 				vlayout(c_sdk, c_notif) | hcenter,
-				b_daftar | hflex,
+				b_daftar | foreground("#81a1c1") | hflex,
 				b_exit | hflex
 			)
 			| border_double_line
@@ -240,7 +256,11 @@ private:
 				text("Notification")
 				| border_rounded
 				| hcenter,
-				text(message) | hcenter,
+				hlayout(
+					hspace(2),
+					text(message) | hcenter,
+					hspace(2)
+				) | hflex,
 				vspace(),
 				b_ok | hcenter
 			)
