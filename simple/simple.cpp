@@ -1,276 +1,306 @@
 #include "simple.h"
+
 #include "simple/renderable/vertical_layout.h"
+#include "simple/renderable/horizontal_layout.h"
 #include "simple/renderable/text.h"
-#include "simple/renderable/horizontal_center.h"
-#include "simple/renderable/vertical_center.h"
 #include "simple/renderable/center.h"
 #include "simple/renderable/horizontal_space.h"
 #include "simple/renderable/vertical_space.h"
 
-#include "simple/focusable/input.h"
-#include "simple/focusable/dropdown.h"
-#include "simple/focusable/button.h"
 #include "simple/focusable/vertical_container.h"
 #include "simple/focusable/horizontal_container.h"
+#include "simple/focusable/input.h"
+#include "simple/focusable/button.h"
+#include "simple/focusable/dropdown.h"
 
 #include "simple/selectable/radiobox.h"
 #include "simple/selectable/checkbox.h"
 
+#include "simple/modifier/flex.h"
 #include "simple/modifier/border.h"
-#include "simple/modifier/foreground.h"
-#include "simple/modifier/background.h"
 
-class app final : public simple::application {
+class my_app final : public simple::application {
 public:
-	app(int height, int width) :
+	my_app(int height, int width) :
 		application(height, width) {
 	}
 
 private:
-	int main() override {
-		auto i_nama_depan = input("Nama Depan");
-		i_nama_depan->width = 25;
-		auto i_nama_belakang = input("Nama belakang");
-		i_nama_belakang->width = 25;
-		auto r_laki_laki = radiobox("Laki-Laki");
-		auto r_perempuan = radiobox("Perempuan");
-		auto gr_jenis_kelamin = selectable_group(r_laki_laki, r_perempuan);
-		auto i_alamat = input();
-		i_alamat->height = 3;
-		i_alamat->width = 51;
-		auto formatted_alamat = [&]() {
-			std::string alamat = i_alamat->get_value();
-			
-			// simple calculation
+	void main() override {
+		std::vector<std::string> list_jurusan = {
+			"Matematika", "Fisika", "Biologi", "Kimia", "Statistika", "Aktuaria",
+			"Meteorologi", "Astronomi", "Geofisika", "Geologi", "Ilmu Kedokteran",
+			"Pendidikan Dokter", "Kedokteran Gigi", "Kedokteran Hewan", "Gizi",
+			"Ilmu Keperawatan", "Apoteker", "Kebidanan", "Kesehatan Lingkungan",
+			"Keselamatan dan Kesehatan Kerja", "Kesehatan Masyarakat", "Farmasi / Ilmu Farmasi",
+			"Teknik Elektro", "Teknik Sipil", "Teknik Listrik", "Teknik Bangunan",
+			"Teknik Biomedis", "Teknik Geodesi", "Teknik Geologi", "Teknik Kimia",
+			"Pendidikan Teknologi Agroindustri", "Teknik Lingkungan", "Teknik Mesin",
+			"Teknik Perkapalan", "Teknik Nuklir", "Rekayasa Keselamatan Kebakaran",
+			"Teknik Kimia", "Teknologi Bioproses", "Teknik Informatika", "Teknik Industri",
+			"Teknik Biomedis", "Teknik Pertambangan", "Teknik Perminyakan", "Teknik Material",
+			"Teknik Geodesi dan Geomatika", "Teknik Dirgantara / Penerbangan", "Teknik Metalurgi",
+			"Ilmu Komputer", "Teknologi Informasi", "Sistem Informasi", "Teknik Komputer",
+			"Arsitektur", "Perencanaan Wilayah dan Kota", "Teknik Pengairan", "Arsitektur Interior",
+			"Kehutanan", "Agronomi", "Akuakultur", "Teknik Pertanian", "Teknologi Pangan",
+			"Teknologi Industri Pertanian", "Pertanian dan Agribisnis", "Agribisnis", "Peternakan",
+			"Ilmu Kelautan", "Ilmu Perikanan / Teknologi Perikanan", "Agrobisnis Perikanan",
+			"Bioteknologi", "Agriekoteknologi", "Hubungan Internasional", "Ilmu Politik",
+			"Ilmu Pemerintahan", "Kriminologi", "Sosiologi", "Ilmu Administrasi Negara",
+			"Ilmu Administrasi Niaga", "Ilmu Administrasi Fiskal", "Administrasi Bisnis / Tata Niaga",
+			"Administrasi Publik", "Administrasi Pemerintahan", "Antropologi Sosial / Antropologi Budaya",
+			"Arkeologi", "Sejarah", "Ilmu Komunikasi", "Ilmu Perpustakaan", "Kearsipan Digital",
+			"Jurnalistik", "Hubungan Masyarakat", "TV dan Film", "Manajemen Komunikasi",
+			"Bahasa dan Kebudayaan Korea", "Bahasa dan Budaya Tiongkok", "Sastra Belanda",
+			"Sastra Cina", "Sastra Indonesia", "Sastra Jawa / Sunda / Daerah", "Sastra Jepang",
+			"Sastra Jerman", "Sastra Inggris", "Sastra Prancis", "Sastra Rusia / Slavia",
+			"Sastra Arab", "Sejarah dan Kebudayaan Islam", "Ilmu Filsafat", "Ilmu Ekonomi",
+			"Ekonomi Pembangunan", "Hubungan Masyarakat", "Manajemen", "Manajemen Bisnis",
+			"Akuntansi", "Ilmu Ekonomi Islam", "Bisnis Islam", "Bisnis Digital", "Bisnis Internasional",
+			"Keuangan dan Perbankan", "Kewirausahaan", "Ilmu Hukum", "Psikologi", "Geografi",
+			"Ilmu Kesejahteraan Sosial", "Studi Agama", "Peradilan Agama", "Politik Islam",
+			"Teologi", "Pariwisata", "Perhotelan", "Teknologi Pendidikan", "Administrasi Pendidikan",
+			"Manajemen Pendidikan", "Psikologi Pendidikan dan Bimbingan", "Pendidikan Masyarakat",
+			"Pendidikan Khusus", "Bimbingan dan Konseling", "Perpustakaan & Sains Informasi",
+			"Pendidikan Guru Sekolah Dasar(PGSD)", "Pendidikan Guru Anak Usia Dini(PAUD)",
+			"Pendidikan Luar Sekolah(PLS)", "Pendidikan Luar Biasa", "Pendidikan Bahasa Indonesia",
+			"Pendidikan Bahasa Daerah", "Pendidikan Bahasa Inggris", "Pendidikan Bahasa Arab",
+			"Pendidikan Bahasa Jepang", "Pendidikan Bahasa Jerman", "Pendidikan Bahasa Prancis",
+			"Pendidikan Bahasa Korea", "Pendidikan Pancasila dan Kewarganegaraan", "Pendidikan Sejarah",
+			"Pendidikan Geografi", "Pendidikan Sosiologi", "Pendidikan IPS", "Pendidikan Agama Islam",
+			"Manajemen Pemasaran Pariwisata", "Pendidikan Matematika", "Pendidikan Fisika",
+			"Pendidikan Biologi", "Pendidikan Kimia", "Pendidikan IPA", "Pendidikan Ilmu Komputer",
+			"Pendidikan Seni Rupa", "Pendidikan Seni Tari", "Pendidikan Seni Musik",
+			"Pendidikan Kepelatihan Olahraga", "Pendidikan Jasmani, Kesehatan, dan Rekreasi",
+			"Pendidikan Teknik Otomotif", "Teknologi Pendidikan", "Administrasi Pendidikan",
+			"Manajemen Pendidikan", "Psikologi Pendidikan dan Bimbingan", "Pendidikan Masyarakat",
+			"Pendidikan Khusus", "Bimbingan dan Konseling", "Perpustakaan& Sains Informasi",
+			"Pendidikan Guru Sekolah Dasar(PGSD)", "Pendidikan Guru Anak Usia Dini(PAUD)",
+			"Pendidikan Luar Sekolah(PLS)", "Pendidikan Luar Biasa", "Pendidikan Bahasa Indonesia",
+			"Pendidikan Bahasa Daerah", "Pendidikan Bahasa Inggris", "Pendidikan Bahasa Arab",
+			"Pendidikan Bahasa Jepang", "Pendidikan Bahasa Jerman", "Pendidikan Bahasa Prancis",
+			"Pendidikan Bahasa Korea", "Pendidikan Pancasila dan Kewarganegaraan", "Pendidikan Sejarah",
+			"Pendidikan Geografi", "Pendidikan Sosiologi", "Pendidikan IPS", "Pendidikan Agama Islam",
+			"Manajemen Pemasaran Pariwisata", "Pendidikan Matematika", "Pendidikan Fisika",
+			"Pendidikan Biologi", "Pendidikan Kimia", "Pendidikan IPA", "Pendidikan Ilmu Komputer",
+			"Pendidikan Seni Rupa", "Pendidikan Seni Tari", "Pendidikan Seni Musik",
+			"Pendidikan Kepelatihan Olahraga", "Pendidikan Jasmani, Kesehatan, dan Rekreasi",
+			"Pendidikan Teknik Otomotif", "Seni Rupa Murni", "Seni Kriya", "Seni Tari", "Seni Musik",
+			"Desain dan Komunikasi Visual", "Desain Interior", "Desain Produk", "Tata Kelola Seni",
+			"Film dan Televisi", "Film dan Animasi", "Musik", "Tata Rias", "Tata Busana", "Tata Boga",
+			"Sekretaris", "Administrasi Asuransi dan Aktuaria", "Administrasi Keuangan dan Perbankan",
+			"Administrasi Perkantoran dan Sekretaris", "Administrasi Perpajakan", "Administrasi Bisnis",
+			"Fisioterapi", "Hubungan Masyarakat", "Manajemen Informasi dan Dokumentasi",
+			"Vokasional Pariwisata", "Okupasi Terapi", "Penyiaran Multimedia", "Periklanan Kreatif",
+			"Akuntansi", "Administrasi Perumahsakitan", "Manajemen Perhotelan", "Desain Grafis",
+			"Batik dan Fashion", "Akuntansi perpajakan", "Akuntansi sektor publik", "Bisnis internasional",
+			"Pemasaran digital"
+		};
+
+		auto input_nama_depan = input("Nama Depan");
+		input_nama_depan->width = 25;
+		auto input_nama_belakang = input("Nama Belakang (Opsional)");
+		input_nama_belakang->width = 25;
+		auto radiobox_laki_laki = radiobox("Laki-Laki");
+		auto radiobox_perempuan = radiobox("Perempuan");
+		auto selectable_group_jenis_kelamin = selectable_group(
+			radiobox_laki_laki,
+			radiobox_perempuan
+		);
+		auto input_alamat = input();
+		input_alamat->width = 51;
+		input_alamat->height = 3;
+		auto radiobox_islam = radiobox("Islam");
+		auto radiobox_kristen1 = radiobox("Kristen Katolik");
+		auto radiobox_kristen2 = radiobox("Kristen Protestan");
+		auto radiobox_hindu = radiobox("Hindu");
+		auto radiobox_buddha = radiobox("Buddha");
+		auto radiobox_konghuchu = radiobox("Konghuchu");
+		auto selectable_group_agama = selectable_group(
+			radiobox_islam,
+			radiobox_kristen1,
+			radiobox_kristen2,
+			radiobox_hindu,
+			radiobox_buddha,
+			radiobox_konghuchu
+		);
+		auto input_nomor_hp = input();
+		input_nomor_hp->width = 48;
+		input_nomor_hp->pattern = isdigit;
+		input_nomor_hp->limit = 13;
+		auto dropdown_jurusan = dropdown("Silakan pilih", list_jurusan);
+		dropdown_jurusan->width = 51;
+		auto checkbox_sdk = checkbox("Saya menyetujui syarat dan ketentuan.");
+		auto checkbox_email = checkbox("Kirim saya email notifikasi.");
+		auto function_wrap_alamat = [&]() {
+			std::string alamat = input_alamat->get_value();
+			size_t half = alamat.size() / 2;
+
 			if (alamat.size() > 50) {
-				size_t half = alamat.size() / 2;
 				return vlayout(
 					text(alamat.substr(0, half)),
 					text(alamat.substr(half, std::string::npos))
 				);
 			}
-
 			return text(alamat);
-		};
-		auto r_islam = radiobox("Islam");
-		auto r_kristen1 = radiobox("Kristen Katolik");
-		auto r_kristen2 = radiobox("Kristen Protestan");
-		auto r_hindu = radiobox("Hindu");
-		auto r_buddha = radiobox("Buddha");
-		auto r_konghuchu = radiobox("Konghuchu");
-		auto gr_agama = selectable_group(
-			r_islam,
-			r_kristen1,
-			r_kristen2,
-			r_hindu,
-			r_buddha,
-			r_konghuchu
-		);
-		auto i_hp = input();
-		i_hp->width = 48;
-		i_hp->pattern = isdigit;
-		auto d_jurusan = dropdown(
-			"Silakan Pilih",
-			{
-				"Matematika", "Fisika", "Biologi", "Kimia", "Statistika", "Aktuaria",
-				"Meteorologi", "Astronomi", "Geofisika", "Geologi", "Ilmu Kedokteran",
-				"Pendidikan Dokter", "Kedokteran Gigi", "Kedokteran Hewan", "Gizi",
-				"Ilmu Keperawatan", "Apoteker", "Kebidanan", "Kesehatan Lingkungan",
-				"Keselamatan dan Kesehatan Kerja", "Kesehatan Masyarakat", "Farmasi / Ilmu Farmasi",
-				"Teknik Elektro", "Teknik Sipil", "Teknik Listrik", "Teknik Bangunan",
-				"Teknik Biomedis", "Teknik Geodesi", "Teknik Geologi", "Teknik Kimia",
-				"Pendidikan Teknologi Agroindustri", "Teknik Lingkungan", "Teknik Mesin",
-				"Teknik Perkapalan", "Teknik Nuklir", "Rekayasa Keselamatan Kebakaran",
-				"Teknik Kimia", "Teknologi Bioproses", "Teknik Informatika", "Teknik Industri",
-				"Teknik Biomedis", "Teknik Pertambangan", "Teknik Perminyakan", "Teknik Material",
-				"Teknik Geodesi dan Geomatika", "Teknik Dirgantara / Penerbangan", "Teknik Metalurgi",
-				"Ilmu Komputer", "Teknologi Informasi", "Sistem Informasi", "Teknik Komputer",
-				"Arsitektur", "Perencanaan Wilayah dan Kota", "Teknik Pengairan", "Arsitektur Interior",
-				"Kehutanan", "Agronomi", "Akuakultur", "Teknik Pertanian", "Teknologi Pangan",
-				"Teknologi Industri Pertanian", "Pertanian dan Agribisnis", "Agribisnis", "Peternakan",
-				"Ilmu Kelautan", "Ilmu Perikanan / Teknologi Perikanan", "Agrobisnis Perikanan",
-				"Bioteknologi", "Agriekoteknologi", "Hubungan Internasional", "Ilmu Politik",
-				"Ilmu Pemerintahan", "Kriminologi", "Sosiologi", "Ilmu Administrasi Negara",
-				"Ilmu Administrasi Niaga", "Ilmu Administrasi Fiskal", "Administrasi Bisnis / Tata Niaga",
-				"Administrasi Publik", "Administrasi Pemerintahan", "Antropologi Sosial / Antropologi Budaya",
-				"Arkeologi", "Sejarah", "Ilmu Komunikasi", "Ilmu Perpustakaan", "Kearsipan Digital",
-				"Jurnalistik", "Hubungan Masyarakat", "TV dan Film", "Manajemen Komunikasi",
-				"Bahasa dan Kebudayaan Korea", "Bahasa dan Budaya Tiongkok", "Sastra Belanda",
-				"Sastra Cina", "Sastra Indonesia", "Sastra Jawa / Sunda / Daerah", "Sastra Jepang",
-				"Sastra Jerman", "Sastra Inggris", "Sastra Prancis", "Sastra Rusia / Slavia",
-				"Sastra Arab", "Sejarah dan Kebudayaan Islam", "Ilmu Filsafat", "Ilmu Ekonomi",
-				"Ekonomi Pembangunan", "Hubungan Masyarakat", "Manajemen", "Manajemen Bisnis",
-				"Akuntansi", "Ilmu Ekonomi Islam", "Bisnis Islam", "Bisnis Digital", "Bisnis Internasional",
-				"Keuangan dan Perbankan", "Kewirausahaan", "Ilmu Hukum", "Psikologi", "Geografi",
-				"Ilmu Kesejahteraan Sosial", "Studi Agama", "Peradilan Agama", "Politik Islam",
-				"Teologi", "Pariwisata", "Perhotelan", "Teknologi Pendidikan", "Administrasi Pendidikan",
-				"Manajemen Pendidikan", "Psikologi Pendidikan dan Bimbingan", "Pendidikan Masyarakat",
-				"Pendidikan Khusus", "Bimbingan dan Konseling", "Perpustakaan & Sains Informasi",
-				"Pendidikan Guru Sekolah Dasar(PGSD)", "Pendidikan Guru Anak Usia Dini(PAUD)",
-				"Pendidikan Luar Sekolah(PLS)", "Pendidikan Luar Biasa", "Pendidikan Bahasa Indonesia",
-				"Pendidikan Bahasa Daerah", "Pendidikan Bahasa Inggris", "Pendidikan Bahasa Arab",
-				"Pendidikan Bahasa Jepang", "Pendidikan Bahasa Jerman", "Pendidikan Bahasa Prancis",
-				"Pendidikan Bahasa Korea", "Pendidikan Pancasila dan Kewarganegaraan", "Pendidikan Sejarah",
-				"Pendidikan Geografi", "Pendidikan Sosiologi", "Pendidikan IPS", "Pendidikan Agama Islam",
-				"Manajemen Pemasaran Pariwisata", "Pendidikan Matematika", "Pendidikan Fisika",
-				"Pendidikan Biologi", "Pendidikan Kimia", "Pendidikan IPA", "Pendidikan Ilmu Komputer",
-				"Pendidikan Seni Rupa", "Pendidikan Seni Tari", "Pendidikan Seni Musik",
-				"Pendidikan Kepelatihan Olahraga", "Pendidikan Jasmani, Kesehatan, dan Rekreasi",
-				"Pendidikan Teknik Otomotif", "Teknologi Pendidikan", "Administrasi Pendidikan",
-				"Manajemen Pendidikan", "Psikologi Pendidikan dan Bimbingan", "Pendidikan Masyarakat",
-				"Pendidikan Khusus", "Bimbingan dan Konseling", "Perpustakaan& Sains Informasi",
-				"Pendidikan Guru Sekolah Dasar(PGSD)", "Pendidikan Guru Anak Usia Dini(PAUD)",
-				"Pendidikan Luar Sekolah(PLS)", "Pendidikan Luar Biasa", "Pendidikan Bahasa Indonesia",
-				"Pendidikan Bahasa Daerah", "Pendidikan Bahasa Inggris", "Pendidikan Bahasa Arab",
-				"Pendidikan Bahasa Jepang", "Pendidikan Bahasa Jerman", "Pendidikan Bahasa Prancis",
-				"Pendidikan Bahasa Korea", "Pendidikan Pancasila dan Kewarganegaraan", "Pendidikan Sejarah",
-				"Pendidikan Geografi", "Pendidikan Sosiologi", "Pendidikan IPS", "Pendidikan Agama Islam",
-				"Manajemen Pemasaran Pariwisata", "Pendidikan Matematika", "Pendidikan Fisika",
-				"Pendidikan Biologi", "Pendidikan Kimia", "Pendidikan IPA", "Pendidikan Ilmu Komputer",
-				"Pendidikan Seni Rupa", "Pendidikan Seni Tari", "Pendidikan Seni Musik",
-				"Pendidikan Kepelatihan Olahraga", "Pendidikan Jasmani, Kesehatan, dan Rekreasi",
-				"Pendidikan Teknik Otomotif", "Seni Rupa Murni", "Seni Kriya", "Seni Tari", "Seni Musik",
-				"Desain dan Komunikasi Visual", "Desain Interior", "Desain Produk", "Tata Kelola Seni",
-				"Film dan Televisi", "Film dan Animasi", "Musik", "Tata Rias", "Tata Busana", "Tata Boga",
-				"Sekretaris", "Administrasi Asuransi dan Aktuaria", "Administrasi Keuangan dan Perbankan",
-				"Administrasi Perkantoran dan Sekretaris", "Administrasi Perpajakan", "Administrasi Bisnis",
-				"Fisioterapi", "Hubungan Masyarakat", "Manajemen Informasi dan Dokumentasi",
-				"Vokasional Pariwisata", "Okupasi Terapi", "Penyiaran Multimedia", "Periklanan Kreatif",
-				"Akuntansi", "Administrasi Perumahsakitan", "Manajemen Perhotelan", "Desain Grafis",
-				"Batik dan Fashion", "Akuntansi perpajakan", "Akuntansi sektor publik", "Bisnis internasional",
-				"Pemasaran digital"
-			}
-		);
-		d_jurusan->width = 51;
-		auto c_sdk = checkbox("Saya menyetujui syarat dan ketentuan");
-		auto c_notif = checkbox("Saya ingin menerima notifikasi");
-		auto confirm = [&]() -> bool {
-			bool loop = true;
-			bool returning = false;
-			auto b_ok = button("Lanjut", [&]() { loop = false; returning = true; });
-			auto b_no = button("Kembali", [&]() { loop = false; returning = false; });
-			auto layout = vlayout(
-				vlayout(
-					text("Konfirmasi") | border_rounded | hcenter,
-					text("Apakah data yang anda masukkan sudah benar?") | hcenter,
-					vspace(),
-					vlayout(
-						hlayout(text("Nama Lengkap        : "), text(i_nama_depan->get_value()), hspace(), text(i_nama_belakang->get_value())),
-						hlayout(text("Jenis Kelamin       : "), text(gr_jenis_kelamin.selected()->get_name())),
-						hlayout(text("Alamat Rumah        : "), formatted_alamat()),
-						hlayout(text("Agama               : "), text(gr_agama.selected()->get_name())),
-						hlayout(text("Nomor Telepon       : "), text(i_hp->get_value())),
-						hlayout(text("Jurusan yang dituju : "), text(d_jurusan->get_value()))
-					) | border_rounded | hcenter,
-					hlayout(b_no, hspace(), b_ok | foreground("#81a1c1")) | hcenter
-				) | border_double_line | center | hflex
-			);
-			auto component = hcontainer(b_no, b_ok);
-
-			application::render_by_condition(loop, layout, component);
-
-			return returning;
 			};
-		auto b_daftar = button("Daftar",
+		auto function_daftar = [&]() -> bool {
+			if (input_nama_depan->get_value().empty()) {
+				notification("Silakan isi Nama depan.");
+				return false;
+			}
+			else if (!selectable_group_jenis_kelamin.selected()) {
+				notification("Pilih Jenis kelamin.");
+				return false;
+			}
+			else if (input_alamat->get_value().empty()) {
+				notification("Silakan isi Alamat.");
+				return false;
+			}
+			else if (!selectable_group_agama.selected()) {
+				notification("Silakan pilih Agama.");
+				return false;
+			}
+			else if (input_nomor_hp->get_value().empty()) {
+				notification("Silakan isi nomor telepon.");
+				return false;
+			}
+			else if (dropdown_jurusan->get_value().empty()) {
+				notification("Silakan pilih jurusan.");
+				return false;
+			}
+			else if (!checkbox_sdk->selected())
+			{
+				notification("Syarat dan ketentuan harus disetujui.");
+				return false;
+			}
+			return true;
+			};
+		auto function_konfirmasi = [&]() -> bool {
+			bool result = false;
+			bool looping = true;
+			auto button_lanjutkan = button("Lanjutkan", [&]() { looping = false; result = true; });
+			auto button_kembali = button("Kembali", [&]() { looping = false; });
+
+			auto layout_konfirmasi = vlayout(
+				vlayout(
+					text("Apakah data berikut sudah benar?")
+					| center
+					| border_rounded
+					| hflex,
+					vlayout(
+						hlayout(text("Nama lengkap   : "), text(input_nama_depan->get_value()), hspace(), text(input_nama_belakang->get_value())),
+						hlayout(text("Jenis kelamin  : "), text(selectable_group_jenis_kelamin.selected()->get_name())),
+						hlayout(text("Alamat lengkap : "), function_wrap_alamat()),
+						hlayout(text("Agama          : "), text(selectable_group_agama.selected()->get_name())),
+						hlayout(text("Nomor telepon  : "), text(input_nomor_hp->get_value())),
+						hlayout(text("Jurusan        : "), text(dropdown_jurusan->get_value()))
+					) | border_rounded,
+					hlayout(
+						button_kembali,
+						hspace(),
+						button_lanjutkan
+					) | hcenter
+				)
+				| border_double_line
+				| center
+				| hflex
+			);
+
+			auto container_konfirmasi = hcontainer(
+				button_kembali,
+				button_lanjutkan
+			);
+
+			application::render(looping, layout_konfirmasi, container_konfirmasi);
+
+			return result;
+			};
+		auto button_daftar = button("Daftar",
 			[&]() {
-				if (i_nama_depan->get_value().empty()) {
-					notification("Nama depan tidak boleh kosong.");
-				}
-				else if (i_nama_belakang->get_value().empty()) {
-					notification("Nama belakang tidak boleh kosong.");
-				}
-				else if (!gr_jenis_kelamin.selected()) {
-					notification("Jenis kelamin harus dipilih.");
-				}
-				else if (i_alamat->get_value().empty()) {
-					notification("Alamat tidak boleh kosong.");
-				}
-				else if (!gr_agama.selected()) {
-					notification("Agama harus dipilih.");
-				}
-				else if (i_hp->get_value().empty()) {
-					notification("Nomor telepon tidak boleh kosong.");
-				}
-				else if (d_jurusan->get_value() == "") {
-					notification("Jurusan harus dipilih.");
-				}
-				else if (!c_sdk->selected()) {
-					notification("Syarat dan ketentuan harus disetujui.");
-				}
-				else {
-					if (confirm()) {
-						notification("Pendaftaran berhasil.");
+				if (function_daftar()) {
+					if (function_konfirmasi()) {
+						notification("Pendaftaran mahasiswa berhasil.");
 						application::stop();
 					}
 				}
 			}
 		);
-		auto b_exit = button("Keluar", [&]() { application::stop(); });
-		auto form_daftar_layout = vlayout(
+		auto button_keluar = button("Keluar", [&]() { application::stop(); });
+
+		auto layout_register = vlayout(
 			vlayout(
 				text("PENDAFTARAN MAHASISWA BARU")
+				| hcenter
 				| border_rounded
-				| hcenter,
-				text("Nama Lengkap"),
-				hlayout(i_nama_depan, hspace(), i_nama_belakang),
-				text("Jenis Kelamin"),
-				hlayout(r_laki_laki, hspace(), r_perempuan),
-				text("Alamat Rumah"),
-				i_alamat,
+				| hflex,
+				text("Nama lengkap"),
+				hlayout(input_nama_depan, hspace(), input_nama_belakang),
+				text("Jenis kelamin"),
+				hlayout(radiobox_laki_laki, hspace(), radiobox_perempuan),
+				text("Alamat lengkap"),
+				input_alamat,
 				text("Agama"),
-				hlayout(r_islam, hspace(), r_kristen1, hspace(), r_kristen2),
-				hlayout(r_hindu, hspace(), r_buddha, hspace(), r_konghuchu),
-				text("Nomor Telepon"),
-				hlayout(text("+62"), i_hp),
-				text("Jurusan yang dituju"),
-				d_jurusan,
-				vlayout(c_sdk, c_notif) | hcenter,
-				b_daftar | foreground("#81a1c1") | hflex,
-				b_exit | hflex
+				hlayout(radiobox_islam, hspace(), radiobox_kristen1, hspace(), radiobox_kristen2),
+				hlayout(radiobox_hindu, hspace(), radiobox_buddha, hspace(), radiobox_konghuchu),
+				text("Nomor telepon"),
+				hlayout(text("+62"), input_nomor_hp),
+				text("Jurusan"),
+				dropdown_jurusan,
+				vlayout(
+					checkbox_sdk,
+					checkbox_email
+				) | hcenter,
+				button_daftar | hflex,
+				button_keluar | hflex
 			)
 			| border_double_line
 			| center
 			| hflex
 		);
-		auto form_daftar_container = vcontainer(
-			hcontainer(i_nama_depan, i_nama_belakang),
-			hcontainer(r_laki_laki, r_perempuan),
-			i_alamat,
-			hcontainer(r_islam, r_kristen1, r_kristen2),
-			hcontainer(r_hindu, r_buddha, r_konghuchu),
-			i_hp,
-			d_jurusan,
-			c_sdk,
-			c_notif,
-			b_daftar,
-			b_exit
+
+		auto container_register = vcontainer(
+			hcontainer(input_nama_depan, input_nama_belakang),
+			hcontainer(radiobox_laki_laki, radiobox_perempuan),
+			input_alamat,
+			hcontainer(radiobox_islam, radiobox_kristen1, radiobox_kristen2),
+			hcontainer(radiobox_hindu, radiobox_buddha, radiobox_konghuchu),
+			input_nomor_hp,
+			dropdown_jurusan,
+			checkbox_sdk,
+			checkbox_email,
+			button_daftar,
+			button_keluar
 		);
-		application::render(form_daftar_layout, form_daftar_container);
-		return 0;
+
+		application::render(layout_register, container_register);
 	}
-	void notification(std::string message) {
-		bool loop = true;
-		auto b_ok = button("OK", [&loop]() { loop = false; });
-		auto layout = vlayout(
+	void notification(std::string value) {
+		bool looping = true;
+		auto button_ok = button("Ok", [&]() { looping = false; });
+		auto layout_notification = vlayout(
 			vlayout(
 				text("Notification")
+				| hcenter
 				| border_rounded
-				| hcenter,
+				| hflex,
+				vspace(),
 				hlayout(
 					hspace(2),
-					text(message) | hcenter,
+					text(value) | hcenter,
 					hspace(2)
 				) | hflex,
 				vspace(),
-				b_ok | hcenter
+				button_ok
+				| hcenter
+				| hflex
 			)
 			| border_double_line
 			| center
 			| hflex
 		);
-		auto component = vcontainer(b_ok);
 
-		application::render_by_condition(loop, layout, component);
+		application::render(looping, layout_notification, button_ok);
 	}
 };
 
@@ -278,6 +308,7 @@ int main() {
 	HANDLE output_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(output_handle, &csbi);
-	app app(csbi.srWindow.Bottom - csbi.srWindow.Top + 1, csbi.srWindow.Right - csbi.srWindow.Left + 1);
+	my_app app(csbi.srWindow.Bottom - csbi.srWindow.Top + 1, csbi.srWindow.Right - csbi.srWindow.Left + 1);
 	app.run();
+	return 0;
 }

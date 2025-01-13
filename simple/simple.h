@@ -26,15 +26,15 @@ namespace simple {
 		}
 
 	protected:
-		virtual int main() = 0;
-		void render(std::shared_ptr<simple::renderable> element) {
+		virtual void main() = 0;
+		void render(const std::shared_ptr<simple::renderable> element) {
 			canvas.clear();
 			element->init();
 			element->set({ 0, 0, this->canvas.get_width(), this->canvas.get_height() });
 			element->render(this->canvas);
 			std::cout << "\x1b[H" << canvas.render() << std::flush;
 		}
-		void render(std::shared_ptr<simple::renderable>& element, std::shared_ptr<simple::focusable>& component) {
+		void render(const std::shared_ptr<simple::renderable>& element, const std::shared_ptr<simple::focusable>& component) {
 			component->focused(true);
 
 			bool update = true;
@@ -57,7 +57,7 @@ namespace simple {
 				}
 			}
 		}
-		void render_by_condition(const bool& condition, std::shared_ptr<simple::renderable>& element, std::shared_ptr<simple::focusable>& component) {
+		void render(const bool& condition, const std::shared_ptr<simple::renderable>& element, const std::shared_ptr<simple::focusable>& component) {
 			component->focused(true);
 
 			bool update = true;
