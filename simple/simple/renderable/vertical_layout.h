@@ -74,4 +74,8 @@ std::shared_ptr<simple::renderable> vlayout(T&&... elements) {
 	});
 }
 
+std::shared_ptr<simple::renderable> vlayout(std::vector<std::shared_ptr<simple::renderable>> elements) {
+	return std::make_shared<simple::vertical_layout>(std::move(elements));
+}
+
 #endif // !_VERTICAL_LAYOUT_

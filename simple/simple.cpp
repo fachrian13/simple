@@ -132,17 +132,30 @@ private:
 		dropdown_jurusan->width = 51;
 		auto checkbox_sdk = checkbox("Saya menyetujui syarat dan ketentuan.");
 		auto checkbox_email = checkbox("Kirim saya email notifikasi.");
-		auto function_wrap_alamat = [&]() {
-			std::string alamat = input_alamat->get_value();
-			size_t half = alamat.size() / 2;
+		auto function_wrap_alamat = [&]() -> std::shared_ptr<simple::renderable> {
+			std::istringstream ist(input_alamat->get_value());
+			std::string word;
+			std::string line;
+			std::vector<std::shared_ptr<simple::renderable>> elements;
 
-			if (alamat.size() > 50) {
-				return vlayout(
-					text(alamat.substr(0, half)),
-					text(alamat.substr(half, std::string::npos))
-				);
+			while (ist >> word) {
+				if (line.length() + word.length() + 1 > 50) {
+					elements.emplace_back(text(line));
+					line = word;
+				}
+				else {
+					if (!line.empty()) {
+						line += " ";
+					}
+					line += word;
+				}
 			}
-			return text(alamat);
+
+			if (!line.empty()) {
+				elements.emplace_back(text(line));
+			}
+
+			return vlayout(std::move(elements));
 			};
 		auto function_daftar = [&]() -> bool {
 			if (input_nama_depan->get_value().empty()) {
