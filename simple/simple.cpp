@@ -125,7 +125,7 @@ private:
 			radiobox_konghuchu
 		);
 		auto input_nomor_hp = input();
-		input_nomor_hp->width = 48;
+		input_nomor_hp->width = 47;
 		input_nomor_hp->pattern = isdigit;
 		input_nomor_hp->limit = 13;
 		auto dropdown_jurusan = dropdown("Silakan pilih", list_jurusan);
@@ -257,7 +257,7 @@ private:
 				hlayout(radiobox_islam, hspace(), radiobox_kristen1, hspace(), radiobox_kristen2),
 				hlayout(radiobox_hindu, hspace(), radiobox_buddha, hspace(), radiobox_konghuchu),
 				text("Nomor telepon"),
-				hlayout(text("+62"), input_nomor_hp),
+				hlayout(text("+62-"), input_nomor_hp),
 				text("Jurusan"),
 				dropdown_jurusan,
 				vlayout(
