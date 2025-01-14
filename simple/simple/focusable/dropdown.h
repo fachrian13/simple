@@ -36,7 +36,7 @@ namespace simple {
 						}
 					)->size()
 					);
-				renderable::width = std::max(renderable::width, static_cast<int>(this->placeholder.size()));
+				renderable::width = std::max(renderable::width, static_cast<int>(this->placeholder.size())) + 1;
 			}
 
 			renderable::height = focusable::focused() ? std::min(7, static_cast<int>(this->values.size())) : 1;
@@ -83,6 +83,7 @@ namespace simple {
 			// if items not selected, render placeholder
 			if (this->selected_index < 0 && !this->placeholder.empty()) {
 				for (const auto& i : this->placeholder) {
+					canvas.at(renderable::dimension.top, x).italic = true;
 					canvas.at(renderable::dimension.top, x++).character = i;
 				}
 			}
